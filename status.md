@@ -29,9 +29,9 @@
 
 ## To Do — no external dependencies
 
-- [ ] **Interactive terminal** — visitors can type real commands (`whoami`, `ls ./work/`, `help`, `cat ./about.txt`) and get responses. Input mode activates after the boot animation completes.
-- [ ] **Cloudflare Web Analytics** — add Cloudflare's free, cookie-less analytics beacon to `Base.astro`. No GDPR banner needed.
-- [ ] **Sitemap** — add `@astrojs/sitemap` integration. Unblocks proper search indexing now that the site URL is set.
+- [x] **Interactive terminal** — visitors can type `whoami`, `ls ./work/`, `ls ./drafts/`, `cat ./about.txt`, `open <slug>`, `help`, `clear`. Arrow keys cycle command history.
+- [x] **Cloudflare Web Analytics** — cookie-less beacon via `PUBLIC_CF_ANALYTICS_TOKEN` env var / `CF_ANALYTICS_TOKEN` GitHub secret.
+- [x] **Sitemap** — static `public/sitemap.xml`, `<link rel="sitemap">` in head. (`@astrojs/sitemap` incompatible with Cloudflare adapter's SSR asset rearrangement.)
 
 - [x] **Mobile layout audit** — mobile bottom nav dock added (sm:hidden, terminal aesthetic); Work featured card stacks cleanly; InfraDiagram gets scroll hint on mobile; main/footer get `pb-11 sm:pb-0` to clear the nav.
 - [x] **WCAG AA contrast audit** — `fg-muted` raised from #444444 to #7a7a7a (4.60:1 on #0a0a0a, passes AA). Loader lines updated to match. CSS scrollbar rule scoped to `html` selector (fixes pre-existing build warning).

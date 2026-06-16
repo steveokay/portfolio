@@ -6,7 +6,7 @@ import mdx from '@astrojs/mdx';
 import cloudflare from "@astrojs/cloudflare";
 
 export default defineConfig({
-  // site: 'https://yourdomain.com', // TODO: set before deploying
+  site: 'https://mokaysteve.workers.dev',
   integrations: [
     react(),
     tailwind(),

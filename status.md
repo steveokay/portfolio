@@ -29,6 +29,10 @@
 
 ## To Do — no external dependencies
 
+- [ ] **Interactive terminal** — visitors can type real commands (`whoami`, `ls ./work/`, `help`, `cat ./about.txt`) and get responses. Input mode activates after the boot animation completes.
+- [ ] **Cloudflare Web Analytics** — add Cloudflare's free, cookie-less analytics beacon to `Base.astro`. No GDPR banner needed.
+- [ ] **Sitemap** — add `@astrojs/sitemap` integration. Unblocks proper search indexing now that the site URL is set.
+
 - [x] **Mobile layout audit** — mobile bottom nav dock added (sm:hidden, terminal aesthetic); Work featured card stacks cleanly; InfraDiagram gets scroll hint on mobile; main/footer get `pb-11 sm:pb-0` to clear the nav.
 - [x] **WCAG AA contrast audit** — `fg-muted` raised from #444444 to #7a7a7a (4.60:1 on #0a0a0a, passes AA). Loader lines updated to match. CSS scrollbar rule scoped to `html` selector (fixes pre-existing build warning).
 - [x] **Lighthouse run** — **93 / 100 / 100 / 100** (performance / accessibility / best-practices / seo).
@@ -47,7 +51,7 @@
 - [ ] **Terraform IaC** — write Terraform modules for the k3s homelab stack (metrics-api, Postgres, Prometheus). Mentioned in CLAUDE.md as a deliverable.
 - [x] **Cloudflare Workers deploy** — deployed via `wrangler deploy` through GitHub Actions. Live at https://portfolio.mokaysteve.workers.dev
 - [x] **`astro.config.mjs` site URL** — set to `https://portfolio.mokaysteve.workers.dev`. Canonical URLs and OG tags fully resolved.
-- [ ] **Make GitHub repo public** — Lab section links to `.github/workflows/deploy.yml`. Pipeline visibility is a design feature, not just plumbing.
+- [x] **Make GitHub repo public** — https://github.com/steveokay/portfolio
 
 ---
 

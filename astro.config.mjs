@@ -3,6 +3,8 @@ import react from '@astrojs/react';
 import tailwind from '@astrojs/tailwind';
 import mdx from '@astrojs/mdx';
 
+import cloudflare from "@astrojs/cloudflare";
+
 export default defineConfig({
   // site: 'https://yourdomain.com', // TODO: set before deploying
   integrations: [
@@ -10,8 +12,12 @@ export default defineConfig({
     tailwind(),
     mdx(),
   ],
-  output: 'static',
+
+  output: "hybrid",
+
   build: {
     format: 'directory',
   },
+
+  adapter: cloudflare()
 });

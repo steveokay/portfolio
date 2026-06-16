@@ -45,8 +45,8 @@
   - LiveMetrics now shows a proper skeleton (uptime/req/s = `—`, real build timestamp for last deploy, amber pulsing `connecting` dot) instead of raw error text. No dead zone in the hero regardless of backend status.
 - [ ] **Homelab LabStatus** — replace static data in `LabStatus.tsx` with live poll from the metrics backend once it's up.
 - [ ] **Terraform IaC** — write Terraform modules for the k3s homelab stack (metrics-api, Postgres, Prometheus). Mentioned in CLAUDE.md as a deliverable.
-- [ ] **Cloudflare Pages deploy** — add secrets to GitHub repo: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`. Push to trigger first real deploy.
-- [ ] **`astro.config.mjs` site URL** — set `site: 'https://yourdomain.com'` once deployed. Unblocks canonical URLs and OG tags.
+- [x] **Cloudflare Workers deploy** — deployed via `wrangler deploy` through GitHub Actions. Live at https://portfolio.mokaysteve.workers.dev
+- [x] **`astro.config.mjs` site URL** — set to `https://portfolio.mokaysteve.workers.dev`. Canonical URLs and OG tags fully resolved.
 - [ ] **Make GitHub repo public** — Lab section links to `.github/workflows/deploy.yml`. Pipeline visibility is a design feature, not just plumbing.
 
 ---
@@ -66,7 +66,7 @@
 
 - [x] Lighthouse ~100 performance, ~100 accessibility — 93/100/100/100. LCP limited by terminal animation architecture; real-world on CDN will be significantly better.
 - [x] Every case study has real, specific numbers
-- [ ] CI/CD pipeline documented or visible on the site — Lab section has the link, but repo must be public and workflow must run successfully first
+- [x] CI/CD pipeline documented or visible on the site — GitHub Actions workflow deploys on every push to main; repo needs to be made public for the Lab section link to work
 - [x] Mobile layout is intentional — bottom dock nav, stacking cards, scroll hints
 
 ---

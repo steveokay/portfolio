@@ -1,0 +1,113 @@
+---
+title: "Zero-Downtime k8s Migration: Bare Metal → GKE"
+summary: "Led migration of 12 production services from bare-metal VMs to GKE, preserving SLAs throughout. 40% infrastructure cost reduction, deploy frequency improved from weekly to daily."
+date: 2024-08-20
+tags: ["kubernetes", "terraform", "gke", "ci-cd", "migration"]
+metrics:
+  before: "deploy freq: weekly | infra cost: $18k/mo | MTTR: 45min"
+  after: "deploy freq: daily | infra cost: $10.8k/mo | MTTR: 12min"
+  improvement: "40% cost reduction · 7× deploy frequency · 73% MTTR improvement"
+draft: false
+---
+
+## Problem
+
+Twelve production services running on bare-metal VMs with manual provisioning. Capacity planning required a 6-week lead time. A single deploy required coordination across three teams and a step-by-step runbook.
+
+## Constraints
+
+- 99.95% uptime SLA on core payment services
+- 4-engineer team — migration had to run alongside feature work
+- No budget for a parallel environment; migration had to be incremental
+
+## Architecture decision
+
+Strangler fig pattern: traffic shifted service by service via weighted DNS. Terraform modules for GKE cluster, Helm charts templated from existing Docker Compose configs. Canary deploys via Argo Rollouts for payment-critical services.
+
+## Trade-off not taken
+
+Full Istio service mesh was scoped but deferred. Would have added 3 months to the timeline and ~15% latency overhead with our traffic pattern. mTLS at the ingress layer gave 80% of the security gain in 20% of the time.
+
+## Architecture
+
+<figure aria-label="Migration architecture: bare-metal VMs to GKE via strangler fig pattern">
+  <svg viewBox="0 0 680 240" width="100%" xmlns="http://www.w3.org/2000/svg" font-family='"JetBrains Mono",Menlo,monospace' role="img" aria-labelledby="diag-02-title" style="display:block;max-width:680px">
+    <title id="diag-02-title">Before: 12 services on bare-metal VMs with manual runbooks and weekly deploys. After: GKE cluster with Argo Rollouts canary deploys, Terraform IaC, daily deploy cadence.</title>
+
+    <defs>
+      <marker id="d2-m" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+        <polygon points="0,0.5 0,5.5 5.5,3" fill="#333"/>
+      </marker>
+      <marker id="d2-a" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+        <polygon points="0,0.5 0,5.5 5.5,3" fill="#ffb000"/>
+      </marker>
+      <marker id="d2-g" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+        <polygon points="0,0.5 0,5.5 5.5,3" fill="#27ae60"/>
+      </marker>
+    </defs>
+
+    {/* ── BEFORE ── */}
+    <text x="20" y="18" fill="#3a3a3a" font-size="9" letter-spacing="0.08em">BEFORE · bare-metal VMs</text>
+
+    <rect x="20" y="28" width="580" height="72" rx="2" fill="none" stroke="#1e1e1e" stroke-dasharray="5,3"/>
+    <text x="32" y="42" fill="#2a2a2a" font-size="8">manual provisioning · 6-week lead time · deploy runbook ×3 teams</text>
+
+    {[0,1,2,3,4,5,6,7,8,9,10,11].map((i) => (
+      <rect key={i} x={32 + (i % 6) * 92} y={50 + Math.floor(i/6) * 26} width="82" height="20" rx="1" fill="#0f0f0f" stroke="#1e1e1e"/>
+    ))}
+    {[0,1,2,3,4,5,6,7,8,9,10,11].map((i) => (
+      <text key={`t${i}`} x={73 + (i % 6) * 92} y={64 + Math.floor(i/6) * 26} fill="#3a3a3a" text-anchor="middle" font-size="8.5">svc-{String(i+1).padStart(2,'0')}</text>
+    ))}
+
+    <text x="610" y="48" fill="#c0392b" font-size="9">$18k/mo</text>
+    <text x="610" y="61" fill="#555"    font-size="8.5">weekly</text>
+    <text x="610" y="74" fill="#555"    font-size="8.5">MTTR 45m</text>
+
+    {/* ── DIVIDER ── */}
+    <line x1="20" y1="122" x2="660" y2="122" stroke="#1e1e1e" stroke-width="1"/>
+
+    {/* ── AFTER ── */}
+    <text x="20" y="140" fill="#3a3a3a" font-size="9" letter-spacing="0.08em">AFTER · GKE · strangler fig migration</text>
+
+    {/* CI/CD strip */}
+    <rect x="20"  y="152" width="90" height="30" rx="2" fill="#111" stroke="#1e1e1e"/>
+    <text x="65"  y="169" fill="#e2e2e2" text-anchor="middle" font-size="9.5">GitHub</text>
+    <text x="65"  y="179" fill="#555"    text-anchor="middle" font-size="8">push</text>
+
+    <line x1="111" y1="167" x2="149" y2="167" stroke="#333" stroke-width="1" marker-end="url(#d2-m)"/>
+
+    <rect x="150" y="152" width="100" height="30" rx="2" fill="#111" stroke="#1e1e1e"/>
+    <text x="200" y="169" fill="#e2e2e2" text-anchor="middle" font-size="9.5">GH Actions</text>
+    <text x="200" y="179" fill="#555"    text-anchor="middle" font-size="8">build · test</text>
+
+    <line x1="251" y1="167" x2="289" y2="167" stroke="#ffb000" stroke-width="1.2" marker-end="url(#d2-a)"/>
+    <text x="270"  y="161" fill="#ffb000" text-anchor="middle" font-size="8">deploy</text>
+
+    {/* GKE cluster */}
+    <rect x="290" y="145" width="280" height="58" rx="2" fill="none" stroke="#1e1e1e" stroke-dasharray="5,3"/>
+    <text x="302" y="158" fill="#2a2a2a" font-size="8">GKE cluster · Argo Rollouts canary</text>
+
+    {[0,1,2,3,4,5].map((i) => (
+      <rect key={i} x={302 + (i % 3) * 88} y={163 + Math.floor(i/3) * 24} width="78" height="18" rx="1" fill="#0f0f0f" stroke="#2a2a2a"/>
+    ))}
+    {['svc-01','svc-02','svc-03','svc-04','svc-05','···'].map((name, i) => (
+      <text key={`t${i}`} x={341 + (i % 3) * 88} y={176 + Math.floor(i/3) * 24} fill="#3a3a3a" text-anchor="middle" font-size="8.5">{name}</text>
+    ))}
+
+    {/* Terraform */}
+    <rect x="580" y="152" width="80" height="30" rx="2" fill="#111" stroke="#ffb000" stroke-opacity="0.4"/>
+    <text x="620" y="169" fill="#ffb000" text-anchor="middle" font-size="9">Terraform</text>
+    <text x="620" y="179" fill="#cc8c00" text-anchor="middle" font-size="7.5">IaC · modules</text>
+
+    <text x="290" y="225" fill="#27ae60" font-size="9">$10.8k/mo · daily deploys · MTTR 12m</text>
+  </svg>
+</figure>
+
+## Before / after
+
+| Metric | Before | After |
+|---|---|---|
+| Deploy frequency | Weekly | Daily |
+| Infrastructure cost | $18k/mo | $10.8k/mo |
+| MTTR | 45 min | 12 min |
+| Provisioning lead time | 6 weeks | < 10 min |

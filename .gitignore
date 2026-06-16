@@ -1,0 +1,10 @@
+dist/
+.output/
+node_modules/
+.astro/
+.env
+.env.local
+.DS_Store
+Thumbs.db
+*.log
+.claude/

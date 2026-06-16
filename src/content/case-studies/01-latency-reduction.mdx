@@ -1,0 +1,123 @@
+---
+title: "API p99 Latency: 340ms → 109ms"
+summary: "Diagnosed hot paths in a Go service handling 50k req/s. Eliminated N+1 query patterns, introduced a read-through Redis cache, and rewrote two critical serialization paths."
+date: 2024-03-15
+tags: ["go", "postgresql", "redis", "observability", "profiling"]
+metrics:
+  before: "p99: 340ms | error rate: 0.4% | cache hit: 0%"
+  after: "p99: 109ms | error rate: 0.02% | cache hit: 82%"
+  improvement: "68% p99 reduction · 20× error rate improvement · 82% cache hit rate"
+draft: false
+---
+
+## Problem
+
+A user-facing API endpoint aggregating data across three Postgres tables was degrading under load. p99 latency spiked to 340ms during peak (US East, ~50k req/s), causing frontend timeouts and a 0.4% error rate on checkout flows.
+
+## Constraints
+
+- Zero downtime — endpoint served checkout
+- Postgres 14, no schema changes allowed mid-quarter
+- Fix had to be operable by on-call engineers unfamiliar with the codebase
+
+## Architecture decision
+
+Profiled with `pprof` under production load replay. Found three issues: (1) ORM generating N+1 queries per request, (2) JSON serialization creating GC pressure at 50k req/s, (3) no caching for near-static reference data called on every request.
+
+Rewrote the query as a single JOIN, switched to `encoding/json` streaming encoder, added Redis with TTL=60s for reference data.
+
+## Trade-off not taken
+
+A read replica with pgBouncer would have been architecturally cleaner and future-proof, but added 2 weeks of runway and on-call complexity. The cache + query rewrite shipped in 3 days with equivalent p99 outcomes.
+
+## Architecture
+
+<figure aria-label="System architecture: before and after latency optimization">
+  <svg viewBox="0 0 680 220" width="100%" xmlns="http://www.w3.org/2000/svg" font-family='"JetBrains Mono",Menlo,monospace' role="img" aria-labelledby="diag-01-title" style="display:block;max-width:680px">
+    <title id="diag-01-title">Before: client hits API which fires N+1 queries to Postgres. After: client hits API which checks Redis cache (82% hit), falls back to a single-JOIN Postgres query.</title>
+
+    {/* ── BEFORE ── */}
+    <text x="20" y="18" fill="#3a3a3a" font-size="9" letter-spacing="0.08em">BEFORE</text>
+
+    <rect x="20"  y="28" width="80" height="34" rx="2" fill="#111" stroke="#1e1e1e"/>
+    <text x="60"  y="47" fill="#e2e2e2" text-anchor="middle" font-size="10">client</text>
+    <text x="60"  y="58" fill="#555"    text-anchor="middle" font-size="8.5">browser</text>
+
+    <line x1="101" y1="45" x2="139" y2="45" stroke="#333" stroke-width="1" marker-end="url(#ha-m)"/>
+
+    <rect x="140" y="28" width="90"  height="34" rx="2" fill="#111" stroke="#1e1e1e"/>
+    <text x="185" y="47" fill="#e2e2e2" text-anchor="middle" font-size="10">api</text>
+    <text x="185" y="58" fill="#555"    text-anchor="middle" font-size="8.5">Go / ORM</text>
+
+    {/* N+1 fan-out */}
+    <line x1="231" y1="38" x2="269" y2="30" stroke="#c0392b" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#ha-r)"/>
+    <line x1="231" y1="45" x2="269" y2="45" stroke="#c0392b" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#ha-r)"/>
+    <line x1="231" y1="52" x2="269" y2="60" stroke="#c0392b" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#ha-r)"/>
+    <text x="250"  y="22"  fill="#c0392b" text-anchor="middle" font-size="8">N+1 queries</text>
+
+    <rect x="270" y="20" width="82" height="24" rx="2" fill="#111" stroke="#2a2a2a"/>
+    <text x="311" y="36" fill="#555" text-anchor="middle" font-size="9.5">Postgres</text>
+    <rect x="270" y="48" width="82" height="18" rx="2" fill="#111" stroke="#2a2a2a"/>
+    <text x="311" y="61" fill="#555" text-anchor="middle" font-size="9.5">Postgres</text>
+    <rect x="270" y="70" width="82" height="18" rx="2" fill="#111" stroke="#2a2a2a"/>
+    <text x="311" y="83" fill="#555" text-anchor="middle" font-size="9.5">Postgres</text>
+
+    <text x="380" y="50" fill="#c0392b" font-size="9">p99: 340ms</text>
+    <text x="380" y="63" fill="#555"    font-size="8.5">0.4% errors</text>
+
+    {/* ── DIVIDER ── */}
+    <line x1="20" y1="115" x2="660" y2="115" stroke="#1e1e1e" stroke-width="1"/>
+
+    {/* ── AFTER ── */}
+    <text x="20" y="134" fill="#3a3a3a" font-size="9" letter-spacing="0.08em">AFTER</text>
+
+    <rect x="20"  y="144" width="80" height="34" rx="2" fill="#111" stroke="#1e1e1e"/>
+    <text x="60"  y="163" fill="#e2e2e2" text-anchor="middle" font-size="10">client</text>
+    <text x="60"  y="174" fill="#555"    text-anchor="middle" font-size="8.5">browser</text>
+
+    <line x1="101" y1="161" x2="139" y2="161" stroke="#333" stroke-width="1" marker-end="url(#ha-m)"/>
+
+    <rect x="140" y="144" width="90" height="34" rx="2" fill="#111" stroke="#1e1e1e"/>
+    <text x="185" y="163" fill="#e2e2e2" text-anchor="middle" font-size="10">api</text>
+    <text x="185" y="174" fill="#555"    text-anchor="middle" font-size="8.5">Go / stream</text>
+
+    {/* cache check */}
+    <line x1="231" y1="155" x2="269" y2="155" stroke="#ffb000" stroke-width="1.2" marker-end="url(#ha-a)"/>
+    <text x="250"  y="150"  fill="#ffb000" text-anchor="middle" font-size="8">check</text>
+
+    <rect x="270" y="144" width="82" height="34" rx="2" fill="#111" stroke="#ffb000" stroke-opacity="0.5"/>
+    <text x="311" y="163" fill="#ffb000" text-anchor="middle" font-size="10">Redis</text>
+    <text x="311" y="174" fill="#cc8c00" text-anchor="middle" font-size="8.5">TTL=60s · 82% hit</text>
+
+    {/* cache miss path */}
+    <line x1="353" y1="185" x2="409" y2="190" stroke="#3a3a3a" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#ha-m)"/>
+    <text x="378"  y="185"  fill="#3a3a3a" text-anchor="middle" font-size="7.5">miss</text>
+
+    <rect x="410" y="180" width="90" height="30" rx="2" fill="#111" stroke="#2a2a2a"/>
+    <text x="455" y="197" fill="#555" text-anchor="middle" font-size="9.5">Postgres</text>
+    <text x="455" y="207" fill="#3a3a3a" text-anchor="middle" font-size="8">single JOIN</text>
+
+    <text x="510" y="158" fill="#27ae60" font-size="9">p99: 109ms</text>
+    <text x="510" y="171" fill="#555"    font-size="8.5">0.02% errors</text>
+
+    <defs>
+      <marker id="ha-m" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+        <polygon points="0,0.5 0,5.5 5.5,3" fill="#333"/>
+      </marker>
+      <marker id="ha-r" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+        <polygon points="0,0.5 0,5.5 5.5,3" fill="#c0392b"/>
+      </marker>
+      <marker id="ha-a" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+        <polygon points="0,0.5 0,5.5 5.5,3" fill="#ffb000"/>
+      </marker>
+    </defs>
+  </svg>
+</figure>
+
+## Before / after
+
+| Metric | Before | After |
+|---|---|---|
+| p99 latency | 340ms | 109ms |
+| Error rate | 0.4% | 0.02% |
+| Cache hit rate | — | 82% |

@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    @apply bg-bg text-fg font-sans;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Reduced motion — honored globally before any island loads */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Noise grain overlay — breaks the flat black on large monitors */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    pointer-events: none;
+    opacity: 0.028;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+  }
+
+  /* Custom scrollbar */
+  html {
+    scrollbar-color: #2a2a2a #0a0a0a;
+    scrollbar-width: thin;
+  }
+
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0a0a0a;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #2a2a2a;
+    border-radius: 2px;
+    transition: background 0.15s ease;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 176, 0, 0.45);
+  }
+
+  ::selection {
+    background-color: rgba(255, 176, 0, 0.2);
+    color: #ffb000;
+  }
+
+  :focus-visible {
+    outline: 2px solid #ffb000;
+    outline-offset: 3px;
+  }
+}
+
+@layer utilities {
+  .font-tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Custom cursor — only on fine-pointer devices */
+@media (pointer: fine) {
+  *, *::before, *::after { cursor: none !important; }
+
+  .cursor-ring.cursor-hover {
+    width: 40px !important;
+    height: 40px !important;
+    margin-left: -20px !important;
+    margin-top: -20px !important;
+    border-color: rgba(255, 176, 0, 0.7) !important;
+  }
+}

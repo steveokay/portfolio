@@ -1,0 +1,35 @@
+---
+type Status = 'ok' | 'warn' | 'error' | 'unknown';
+
+interface Props {
+  status?: Status;
+  label?: string;
+  pulse?: boolean;
+  class?: string;
+}
+
+const { status = 'unknown', label, pulse = false, class: className } = Astro.props;
+
+const dotColor: Record<Status, string> = {
+  ok: 'bg-ok',
+  warn: 'bg-warn',
+  error: 'bg-error',
+  unknown: 'bg-unknown',
+};
+---
+
+<span
+  class:list={['inline-flex items-center gap-1.5', className]}
+  role="img"
+  aria-label={label ? `${label}: ${status}` : status}
+>
+  <span
+    class:list={[
+      'inline-block w-1.5 h-1.5 rounded-full',
+      dotColor[status],
+      pulse && status === 'ok' && 'animate-status-pulse',
+    ]}
+    aria-hidden="true"
+  ></span>
+  {label && <span class="font-mono text-xs text-fg-secondary">{label}</span>}
+</span>

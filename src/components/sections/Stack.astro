@@ -1,0 +1,54 @@
+---
+import RevealSection from '../islands/RevealSection';
+import InfraDiagram from '../islands/InfraDiagram';
+
+const layers = [
+  {
+    name: 'compute',
+    items: ['Go', 'Kubernetes', 'Docker', 'k3s'],
+  },
+  {
+    name: 'data',
+    items: ['PostgreSQL', 'Redis', 'Prometheus', 'Grafana'],
+  },
+  {
+    name: 'delivery',
+    items: ['GitHub Actions', 'Terraform', 'Cloudflare Pages', 'Argo Rollouts'],
+  },
+] as const;
+---
+
+<section id="stack" class="px-4 py-24 border-t border-border">
+  <RevealSection client:visible>
+  <div class="mx-auto max-w-4xl">
+    <h2 class="font-mono text-[10px] text-fg-muted uppercase tracking-widest mb-12">
+      ~/stack
+    </h2>
+
+    <!-- Infrastructure diagram — interactive React island -->
+    <p class="sm:hidden font-mono text-[10px] text-fg-muted mb-2" aria-hidden="true">
+      ← scroll to explore →
+    </p>
+    <InfraDiagram client:visible />
+
+    <!-- Quick-reference layer grid -->
+    <div class="grid sm:grid-cols-3 gap-8">
+      {layers.map(({ name, items }) => (
+        <div>
+          <h3 class="font-mono text-[10px] text-fg-muted uppercase tracking-widest mb-4 pb-2 border-b border-border">
+            {name}
+          </h3>
+          <ul class="space-y-2">
+            {items.map((item) => (
+              <li class="font-mono text-xs text-fg-secondary flex items-center gap-2">
+                <span class="text-accent" aria-hidden="true">›</span>
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  </div>
+  </RevealSection>
+</section>

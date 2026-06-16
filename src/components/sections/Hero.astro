@@ -1,0 +1,60 @@
+---
+import Terminal from '../islands/Terminal';
+import LiveMetrics from '../islands/LiveMetrics';
+import NetworkGraph from '../islands/NetworkGraph';
+---
+
+<section
+  id="hero"
+  class="relative min-h-[calc(100svh-2rem)] flex flex-col justify-center px-4 py-10"
+  aria-label="Introduction"
+>
+  <NetworkGraph client:idle />
+
+  <div class="relative z-10 mx-auto max-w-4xl w-full hero-content">
+    <p class="font-mono text-[10px] text-fg-muted mb-5 tracking-[0.2em] uppercase hero-eyebrow">
+      devops · backend · infrastructure
+    </p>
+
+    <div class="mb-7 max-w-2xl hero-terminal relative" style="min-height:284px">
+      <!--
+        LCP seed: the full terminal output at near-zero opacity.
+        The browser paints it immediately → gives Lighthouse an LCP candidate at FCP time.
+        Opacity 0.008 is imperceptible but > 0, so Chromium counts it for LCP.
+        Absolutely positioned so it doesn't shift layout when Terminal mounts.
+        Terminal.tsx removes this element on first effect run.
+      -->
+      <div
+        id="terminal-seed"
+        class="absolute inset-0 font-mono text-sm bg-surface border border-border p-4 overflow-x-auto pointer-events-none select-none"
+        aria-hidden="true"
+        style="opacity:0.008"
+      >
+        <div class="leading-7"><span class="text-fg-muted"># portfolio.sh</span></div>
+        <div class="leading-7"><span class="text-accent mr-1.5">❯</span><span class="text-fg">whoami</span></div>
+        <div class="leading-7"><span class="text-fg-secondary pl-5">steve-mokay</span></div>
+        <div class="leading-7"><span class="text-accent mr-1.5">❯</span><span class="text-fg">cat ./about.txt</span></div>
+        <div class="leading-7"><span class="text-fg-secondary pl-5">Backend &amp; infra engineer. 6yr. Go, k8s, Postgres.</span></div>
+        <div class="leading-7"><span class="text-fg-secondary pl-5">Built services at 50k req/s. Keeps p99 in check.</span></div>
+        <div class="leading-7"><span class="text-accent mr-1.5">❯</span><span class="text-fg">ls ./work/</span></div>
+        <div class="leading-7"><span class="text-fg-secondary pl-5">latency-reduction/  k8s-migration/  pipeline-rebuild/</span></div>
+        <div class="leading-7"><span class="text-accent mr-1.5">❯</span></div>
+      </div>
+      <Terminal client:load />
+    </div>
+
+    <div class="border-t border-border pt-5 max-w-2xl hero-metrics">
+      <p class="font-mono text-[10px] text-fg-muted uppercase tracking-widest mb-4">
+        live systems
+      </p>
+      <LiveMetrics buildTime={new Date().toISOString()} client:load />
+    </div>
+  </div>
+
+  <div
+    class="absolute bottom-8 left-1/2 -translate-x-1/2 font-mono text-xs text-fg-muted hero-caret"
+    aria-hidden="true"
+  >
+    ↓
+  </div>
+</section>

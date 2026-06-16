@@ -1,0 +1,40 @@
+---
+import LabStatus from '../islands/LabStatus';
+import RevealSection from '../islands/RevealSection';
+---
+
+<section id="lab" class="px-4 py-24 border-t border-border">
+  <RevealSection client:visible>
+  <div class="mx-auto max-w-4xl">
+    <h2 class="font-mono text-[10px] text-fg-muted uppercase tracking-widest mb-4">
+      ~/lab
+    </h2>
+    <p class="text-sm text-fg-secondary mb-10 max-w-xl">
+      3-node k3s cluster (Raspberry Pi 5) running the metrics API, Grafana, and
+      miscellaneous experiments. Self-hosted, Terraform-managed, publicly monitored.
+    </p>
+
+    <LabStatus client:visible />
+
+    <div class="mt-12 border border-border p-6">
+      <h3 class="font-mono text-[10px] text-fg-muted uppercase tracking-widest mb-4">
+        pipeline
+      </h3>
+      <p class="text-sm text-fg-secondary mb-4">
+        GitHub Actions deploys this site and the metrics backend on every push to main.
+        The workflow is public — not just described here.
+      </p>
+      <!-- TODO: Update href once the repo is public -->
+      <a
+        href="https://github.com/mokaysteve/portfolio/blob/main/.github/workflows/deploy.yml"
+        class="font-mono text-xs text-accent hover:underline focus:outline-none focus-visible:underline"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="View CI/CD workflow on GitHub"
+      >
+        .github/workflows/deploy.yml ↗
+      </a>
+    </div>
+  </div>
+  </RevealSection>
+</section>

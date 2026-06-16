@@ -20,6 +20,8 @@ const {
 const canonicalURL = Astro.site
   ? new URL(Astro.url.pathname, Astro.site).toString()
   : null;
+
+const cfAnalyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
 ---
 
 <!doctype html>
@@ -43,6 +45,14 @@ const canonicalURL = Astro.site
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title}</title>
     <ViewTransitions />
+
+    {cfAnalyticsToken && (
+      <script
+        defer
+        src="https://static.cloudflareinsights.com/beacon.min.js"
+        data-cf-beacon={`{"token":"${cfAnalyticsToken}"}`}
+      />
+    )}
 
     <style is:global>
       #__loader {

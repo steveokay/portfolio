@@ -82,8 +82,18 @@ const buildSha = (import.meta.env.PUBLIC_BUILD_SHA ?? 'dev').slice(0, 7);
         animation: ll-in 80ms ease-out forwards;
         color: #808080;
       }
-      .ll:last-child { color: #ffb000; }
+      .ll.ll-accent { color: #ffb000; }
       @keyframes ll-in { to { opacity: 1; } }
+
+      /* one-time amber pulse on the ⌘K chip after first boot */
+      @keyframes cmdk-pulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(255, 176, 0, 0); border-color: #1e1e1e; }
+        50%      { box-shadow: 0 0 0 3px rgba(255, 176, 0, 0.16); border-color: rgba(255, 176, 0, 0.65); }
+      }
+      .cmdk-pulse { animation: cmdk-pulse 1.8s ease-in-out 0.4s 4; }
+      @media (prefers-reduced-motion: reduce) {
+        .cmdk-pulse { animation: none; }
+      }
 
       /* Hero entrance — content is rendered from the start (good for LCP);
          the loader covers it at z-index 9999 while it fades out.
@@ -115,22 +125,28 @@ const buildSha = (import.meta.env.PUBLIC_BUILD_SHA ?? 'dev').slice(0, 7);
         <div class="ll" style="animation-delay:260ms">[&nbsp;&nbsp;0.041] runtime &nbsp;· go 1.23 · node 20</div>
         <div class="ll" style="animation-delay:500ms">[&nbsp;&nbsp;0.089] services · 3/3 healthy</div>
         <div class="ll" style="animation-delay:740ms">[&nbsp;&nbsp;0.132] metrics &nbsp;· nominal</div>
-        <div class="ll" style="animation-delay:980ms">[&nbsp;&nbsp;0.158] ready.</div>
+        <div class="ll ll-accent" style="animation-delay:980ms">[&nbsp;&nbsp;0.158] ready.</div>
+        <div class="ll" style="animation-delay:1240ms">[&nbsp;&nbsp;0.220] hint &nbsp;&nbsp;&nbsp;&nbsp;· press <span style="color:#ffb000">⌘K</span> anywhere for navigation</div>
       </div>
     </div>
     <script>
       (function () {
         var el = document.getElementById('__loader');
         if (!el) return;
+        var firstVisit = !sessionStorage.getItem('sb');
         function done() {
           el.remove();
           document.body.classList.add('boot-done');
           sessionStorage.setItem('sb', '1');
+          if (firstVisit) {
+            var kbd = document.querySelector('.cmdk-trigger kbd');
+            if (kbd) kbd.classList.add('cmdk-pulse');
+          }
         }
         // Skip animation on repeat visits — hero appears immediately
-        if (sessionStorage.getItem('sb')) { done(); return; }
+        if (!firstVisit) { done(); return; }
         var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        var hold = reduce ? 0 : 1550;
+        var hold = reduce ? 0 : 2000;
         setTimeout(function () {
           el.style.transition = 'opacity 0.3s ease-out';
           el.style.opacity = '0';

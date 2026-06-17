@@ -35,6 +35,8 @@ const COMMANDS: Record<string, () => FullLine[]> = {
     { type: 'output', content: '  ls ./drafts/      list writing drafts' },
     { type: 'output', content: '  open <slug>       navigate to case study' },
     { type: 'output', content: '  clear             clear interactive history' },
+    { type: 'output', content: '' },
+    { type: 'output', content: 'pro tip: press ⌘K (ctrl+K) anywhere for site-wide navigation' },
   ],
   'cat ./about.txt': () => [
     { type: 'output', content: 'Backend & infra engineer. 6yr. Go, k8s, Postgres.' },

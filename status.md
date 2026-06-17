@@ -98,6 +98,7 @@
 | 17 | Distinctive monospace (Commit Mono) | ✅ |
 | 18 | Easter-egg terminal commands | ✅ |
 | 19 | Palette discoverability (boot hint + chip pulse + help mention) | ✅ |
+| 20 | ASCII diff blocks (case study before/after) | ✅ |
 
 ---
 
@@ -112,7 +113,7 @@
 
 ### Tier 2 — polish that's noticeable
 
-- [ ] **ASCII diff blocks** — case study before/after as unified-diff syntax (`-`/`+` lines) instead of prose. On-brand, scannable, reads as a real postmortem.
+- [x] **ASCII diff blocks** — new `Diff.astro` component renders unified-diff syntax with prefix-aware colors (hunk amber, `+` green, `-` red, context muted) and an optional `diff --git a/<file> b/<file>` header. Replaced the "Before / after" table in all 3 case studies with structured diff blocks that include hunk headers (`@@ peak load: 50k req/s @@`, `@@ stack: bare-metal VMs → GKE @@`, `@@ runner: Jenkins → GitHub Actions @@`) and richer context lines than the original tables (query pattern, secrets handling, test environment isolation, etc.).
 - [ ] **NetworkGraph wired to real data** — packets stop being deterministic, animate from actual GitHub commit frequency / live request rate. Hero graph becomes real-time viz, not decoration.
 - [x] **Easter-egg terminal commands** — added `uptime` (real session time), `date`, `pwd`, `echo <msg>`, `tree ./work/` (ASCII tree), `top`/`htop` (fake process list of the site's services), `cowsay <msg>`, `vim`/`vi`/`nvim` (the joke), `:q`/`:wq` (let you out), `sudo *` (sudoers error), `rm *` (`nice try.`), `history`, `whoami --verbose`, `exit`/`logout`/`quit`, `man`. Hidden behind `help --hidden`. Also fixed broken `open <slug>` URLs (were missing `01-`/`02-`/`03-` prefixes). `whitespace-pre` on terminal lines so ASCII art renders.
 - [ ] **Boot sequence varies per visit** — loader rotates from a 20+ line pool, mixes in real deploy SHAs and randomized timing. Returning visitors get fresh content.

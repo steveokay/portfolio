@@ -10,6 +10,8 @@ metrics:
 draft: false
 ---
 
+import Diff from '../../components/ui/Diff.astro';
+
 ## Problem
 
 A 48-minute Jenkins pipeline was the primary velocity bottleneck. A 6% flaky test rate meant engineers routinely re-triggered builds rather than investigating failures. Every merge was a risk.
@@ -109,8 +111,17 @@ BuildKite with faster agents benchmarked ~20% faster than GHA. Chose GHA for nat
 
 ## Before / after
 
-| Metric | Before | After |
-|---|---|---|
-| Build time | 48 min | 9 min |
-| Flaky test rate | 6% | 0.3% |
-| Daily deploy capability | No | Yes |
+<Diff
+  filename="ci/pipeline"
+  content={`@@ runner: Jenkins → GitHub Actions @@
+- runner:               1× Jenkins worker (long-running, mutable)
+- build time:           48 min     (serial, no cache)
+- flaky test rate:      6%         (shared DB across tests)
+- daily deploys:        blocked    (queue + manual gates)
+- test environment:     shared, dirty
++ runner:               ephemeral matrix (clean per job)
++ build time:           9 min      (parallel + remote cache)
++ flaky test rate:      0.3%       (hermetic containers, isolated DB)
++ daily deploys:        unblocked  (auto on green main)
++ test environment:     per-PR, disposable`}
+/>

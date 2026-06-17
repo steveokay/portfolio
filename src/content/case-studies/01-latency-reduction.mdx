@@ -10,6 +10,8 @@ metrics:
 draft: false
 ---
 
+import Diff from '../../components/ui/Diff.astro';
+
 ## Problem
 
 A user-facing API endpoint aggregating data across three Postgres tables was degrading under load. p99 latency spiked to 340ms during peak (US East, ~50k req/s), causing frontend timeouts and a 0.4% error rate on checkout flows.
@@ -116,8 +118,17 @@ A read replica with pgBouncer would have been architecturally cleaner and future
 
 ## Before / after
 
-| Metric | Before | After |
-|---|---|---|
-| p99 latency | 340ms | 109ms |
-| Error rate | 0.4% | 0.02% |
-| Cache hit rate | — | 82% |
+<Diff
+  filename="metrics/checkout-api"
+  content={`@@ peak load: 50k req/s @@
+- p99 latency:      340ms
+- error rate:       0.4%
+- cache hit rate:   0%   (no cache)
+- query pattern:    N+1 (3 tables)
+- serialization:    encoding/json (buffered)
++ p99 latency:      109ms
++ error rate:       0.02%
++ cache hit rate:   82%  (Redis TTL=60s)
++ query pattern:    single JOIN
++ serialization:    encoding/json (streaming)`}
+/>

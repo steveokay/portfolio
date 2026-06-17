@@ -1,0 +1,70 @@
+---
+// Unified-diff block. Pass `content` as a multi-line string; each line
+// is styled by its prefix:
+//   ---  / +++   → file headers (muted)
+//   @@   …  @@   → hunk header (amber)
+//   +    …       → addition (green)
+//   -    …       → removal (red)
+//   anything else → context (muted)
+//
+// Optional `filename` renders a `diff --git a/<file> b/<file>` header line.
+
+interface Props {
+  content: string;
+  filename?: string;
+}
+
+const { content, filename } = Astro.props;
+
+type LineType = 'header' | 'hunk' | 'add' | 'remove' | 'context';
+
+interface DiffLine {
+  type: LineType;
+  content: string;
+}
+
+const lines: DiffLine[] = content.split('\n').map((raw): DiffLine => {
+  if (raw.startsWith('+++') || raw.startsWith('---')) return { type: 'header', content: raw };
+  if (raw.startsWith('@@')) return { type: 'hunk', content: raw };
+  if (raw.startsWith('+')) return { type: 'add', content: raw };
+  if (raw.startsWith('-')) return { type: 'remove', content: raw };
+  return { type: 'context', content: raw };
+});
+
+const classFor: Record<LineType, string> = {
+  header:  'diff-line diff-header',
+  hunk:    'diff-line diff-hunk',
+  add:     'diff-line diff-add',
+  remove:  'diff-line diff-remove',
+  context: 'diff-line diff-context',
+};
+---
+
+<figure class="diff-block not-prose my-8" role="group" aria-label={filename ? `Diff for ${filename}` : 'Diff'}>
+  {filename && (
+    <header class="diff-filename font-mono text-xs px-4 py-2 border-b border-border text-fg-muted">
+      <span class="text-fg-secondary">diff</span> --git a/<span class="text-fg">{filename}</span> b/<span class="text-fg">{filename}</span>
+    </header>
+  )}
+  <pre class="diff-pre m-0 py-2 font-mono text-xs sm:text-sm leading-7 overflow-x-auto"><code class="block">{lines.map((line) => (
+    <span class={classFor[line.type]}>{line.content || ' '}</span>
+  ))}</code></pre>
+</figure>
+
+<style>
+  .diff-block {
+    background: #111111;
+    border: 1px solid #1e1e1e;
+  }
+  .diff-line {
+    display: block;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    white-space: pre;
+  }
+  .diff-header  { color: #555; }
+  .diff-hunk    { color: #ffb000; background: rgba(255, 176, 0, 0.06); }
+  .diff-add     { color: #6ee7b7; background: rgba(34, 197, 94, 0.07); }
+  .diff-remove  { color: #fca5a5; background: rgba(239, 68, 68, 0.07); }
+  .diff-context { color: #7a7a7a; }
+</style>

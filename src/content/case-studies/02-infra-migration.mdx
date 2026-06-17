@@ -10,6 +10,8 @@ metrics:
 draft: false
 ---
 
+import Diff from '../../components/ui/Diff.astro';
+
 ## Problem
 
 Twelve production services running on bare-metal VMs with manual provisioning. Capacity planning required a 6-week lead time. A single deploy required coordination across three teams and a step-by-step runbook.
@@ -105,9 +107,17 @@ Full Istio service mesh was scoped but deferred. Would have added 3 months to th
 
 ## Before / after
 
-| Metric | Before | After |
-|---|---|---|
-| Deploy frequency | Weekly | Daily |
-| Infrastructure cost | $18k/mo | $10.8k/mo |
-| MTTR | 45 min | 12 min |
-| Provisioning lead time | 6 weeks | < 10 min |
+<Diff
+  filename="infra/12-services"
+  content={`@@ stack: bare-metal VMs → GKE @@
+- deploy frequency:    weekly      (3-team coordination)
+- infrastructure cost: $18,000/mo
+- MTTR:                45 min      (manual runbooks)
+- provisioning lead:   6 weeks     (capacity request → VM)
+- secrets:             ad-hoc env vars on hosts
++ deploy frequency:    daily       (self-service via PR)
++ infrastructure cost: $10,800/mo  (-40%)
++ MTTR:                12 min      (kubectl rollback / Argo)
++ provisioning lead:   < 10 min    (terraform apply)
++ secrets:             External Secrets + GCP Secret Manager`}
+/>

@@ -54,7 +54,8 @@
   }
 
   ::selection {
-    background-color: rgba(13, 94, 94, 0.18);
+    /* Mode-aware via color-mix — uses whichever --accent is active */
+    background-color: color-mix(in srgb, var(--accent) 22%, transparent);
     color: var(--accent);
   }
 

@@ -99,6 +99,7 @@
 | 18 | Easter-egg terminal commands | ✅ |
 | 19 | Palette discoverability (boot hint + chip pulse + help mention) | ✅ |
 | 20 | ASCII diff blocks (case study before/after) | ✅ |
+| 21 | Reading progress + word count on case studies | ✅ |
 
 ---
 
@@ -121,6 +122,6 @@
 ### Tier 3 — small wins
 
 - [ ] **Lab section as Grafana-esque dashboard** — sparkline of CPU/memory over 24h (synthetic ok until backend is live), turn the status list into a monitor.
-- [ ] **Reading time + scroll progress on case studies** — `[████░░░░] 41% · 4 min remaining` engineering-coded indicator at top of case study pages.
+- [x] **Reading time + scroll progress on case studies** — new `ReadingProgress.tsx` island, sticky `top-8` strip just below the top nav. Renders `[████░░░░░░░░░░░░░░░░] 23% · 2 min remaining · 268 words` with a 20-block ASCII bar that fills as the visitor scrolls. Reading time estimated at build time from the raw MDX body (stripped of code blocks, JSX, markdown punctuation; 200 wpm). `requestAnimationFrame`-throttled scroll listener. `role="progressbar"` with proper ARIA values.
 - [ ] **Opt-in keystroke sound** — `[♪ sound: off]` toggle in bottom status bar, soft mechanical keys when typing in the terminal. Unforgettable demo moment for reviewers.
 - [ ] **View-source charm** — HTML comment with ASCII logo + "you're reading source, hi: …". Tiny detail, shareable on Twitter/HN.

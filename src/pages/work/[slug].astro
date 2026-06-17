@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
+import ReadingProgress from '../../components/islands/ReadingProgress';
 
 export async function getStaticPaths() {
   const studies = await getCollection('case-studies');
@@ -12,6 +13,15 @@ export async function getStaticPaths() {
 
 const { study } = Astro.props;
 const { Content } = await study.render();
+
+// reading time estimate from raw MDX body
+const cleanText = (study.body || '')
+  .replace(/```[\s\S]*?```/g, '')   // fenced code blocks
+  .replace(/<[^>]+>/g, '')          // inline JSX / SVG markup
+  .replace(/[#*`_]/g, '')           // basic markdown noise
+  .trim();
+const words = cleanText.split(/\s+/).filter(Boolean).length;
+const totalMin = Math.max(1, Math.round(words / 200));
 ---
 
 <Base title={`${study.data.title} — Case Study`} description={study.data.summary}>
@@ -59,6 +69,8 @@ const { Content } = await study.render();
         ))}
       </div>
     </header>
+
+    <ReadingProgress totalMin={totalMin} words={words} client:load />
 
     <div class="prose prose-invert prose-sm max-w-none
       prose-headings:font-mono prose-headings:text-accent prose-headings:font-normal prose-headings:tracking-tight

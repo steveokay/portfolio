@@ -1,0 +1,81 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="Not found — Steve Okoth"
+  description="The requested path doesn't exist."
+>
+  <section class="px-6 py-20 sm:px-10 sm:py-28">
+    <div class="mx-auto max-w-measure">
+      <p class="text-eyebrow mb-3">404</p>
+      <h1 class="text-display">Not found.</h1>
+
+      <pre class="mt-8 border border-rule bg-surface/60 p-4 font-mono text-meta leading-relaxed text-muted overflow-x-auto">
+<span class="text-accent">$</span> find / -path "<span class="text-ink" id="four-oh-four-path">/</span>"
+find: no matches
+      </pre>
+
+      <p class="mt-10 text-ink/90">
+        The path you requested isn't in the static export. It may have moved,
+        or it may never have existed. Try one of these instead.
+      </p>
+
+      <ul class="mt-8 space-y-2 font-mono text-meta" role="list">
+        <li>
+          <a
+            href="/"
+            class="group inline-flex items-baseline gap-4 hover:text-accent transition-colors duration-240"
+          >
+            <span class="text-ink group-hover:text-accent w-48 sm:w-56 tracking-wide">~/</span>
+            <span class="text-muted">home</span>
+          </a>
+        </li>
+        <li>
+          <a
+            href="/#work"
+            class="group inline-flex items-baseline gap-4 hover:text-accent transition-colors duration-240"
+          >
+            <span class="text-ink group-hover:text-accent w-48 sm:w-56 tracking-wide">~/work</span>
+            <span class="text-muted">case studies</span>
+          </a>
+        </li>
+        <li>
+          <a
+            href="/work/oci-registry"
+            class="group inline-flex items-baseline gap-4 hover:text-accent transition-colors duration-240"
+          >
+            <span class="text-ink group-hover:text-accent w-48 sm:w-56 tracking-wide">~/work/oci-registry</span>
+            <span class="text-muted">OCI registry case</span>
+          </a>
+        </li>
+        <li>
+          <a
+            href="/#contact"
+            class="group inline-flex items-baseline gap-4 hover:text-accent transition-colors duration-240"
+          >
+            <span class="text-ink group-hover:text-accent w-48 sm:w-56 tracking-wide">~/#contact</span>
+            <span class="text-muted">contact</span>
+          </a>
+        </li>
+      </ul>
+
+      <p class="mt-12">
+        <a
+          href="/"
+          class="inline-block border border-accent bg-accent px-5 py-3 font-mono text-meta uppercase tracking-widest text-bg hover:bg-ink hover:border-ink transition-colors duration-240"
+        >
+          Back home &nbsp;→
+        </a>
+      </p>
+    </div>
+  </section>
+
+  <script is:inline>
+    // Surface the actual missed path so the find $ line reads honestly
+    document.addEventListener('DOMContentLoaded', () => {
+      const el = document.getElementById('four-oh-four-path');
+      if (el) el.textContent = window.location.pathname;
+    });
+  </script>
+</Base>

@@ -61,19 +61,27 @@ const cfAnalyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
 
   <body class="min-h-screen">
     <header class="no-print">
-      <div class="mx-auto flex max-w-wide items-center justify-between px-6 py-6 sm:px-10">
+      <div class="mx-auto flex max-w-wide items-center justify-between gap-4 px-6 py-6 sm:px-10">
         <a
           href="/"
           class="font-mono text-meta uppercase tracking-widest text-muted hover:text-accent transition-colors duration-240"
         >
           steve okoth <span class="text-rule">/</span> ~/portfolio
         </a>
-        <a
-          href="#contact"
-          class="font-mono text-meta uppercase tracking-widest text-muted hover:text-accent transition-colors duration-240"
-        >
-          contact &nbsp;→
-        </a>
+        <nav class="flex items-center gap-5 sm:gap-7" aria-label="Primary">
+          <a
+            href="/resume"
+            class="font-mono text-meta uppercase tracking-widest text-muted hover:text-accent transition-colors duration-240"
+          >
+            resume
+          </a>
+          <a
+            href="/#contact"
+            class="font-mono text-meta uppercase tracking-widest text-muted hover:text-accent transition-colors duration-240"
+          >
+            contact &nbsp;→
+          </a>
+        </nav>
       </div>
     </header>
 

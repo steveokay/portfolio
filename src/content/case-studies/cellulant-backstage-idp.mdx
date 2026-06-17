@@ -1,0 +1,68 @@
+---
+title: "Building Cellulant's Internal Developer Platform"
+handle: 'cellulant · backstage idp · 2022 — 2024'
+eyebrow: 'case · 02'
+oneLiner: "Engineers shouldn't need to know your stack to ship safely. So I built the platform that hides it."
+stack:
+  - Backstage
+  - GitLab CI/CD
+  - ArgoCD
+  - Kubernetes
+  - Terraform
+  - Ansible
+  - Prometheus
+  - Grafana
+metricHook: '5 → 100 deploys/day · 2 days → 10 min lead time · $50K/mo cloud saved'
+year: '2022 — 2024'
+order: 2
+framing: 'Senior DevOps Engineer · Cellulant Kenya'
+---
+
+import IdpDiagram from '../../components/diagrams/IdpDiagram.astro';
+
+## Problem
+
+Cellulant's engineering org was waiting too long to ship. Deploy frequency was 5/day across the whole org. Lead time from PR to prod was 2 days. MTTR sat at 5 hours. The root cause wasn't a tooling gap — every team had a CI pipeline, every service had monitoring. The cause was *tribal knowledge.* Every team did things slightly differently; onboarding new engineers took weeks; the platform team became the bottleneck because every new service required a custom unlock.
+
+The fix wasn't faster CI or more on-call. It was to **shape the developer workflow** so that "the right way" was also "the easy way." That's the job of an Internal Developer Platform. Backstage was the right shape — open-source, plugin-driven, built for exactly this.
+
+## Constraints
+
+1. **No greenfield.** Cellulant ran a real production fleet across Java, Go, Python, and PHP with established deploy paths. The IDP had to coexist with reality, not replace it.
+2. **Adopt-don't-build.** Backstage was the prevailing 2022 choice. The team had to learn it, customize it, ship it — not write our own.
+3. **The IDP is internal product.** Engineers are users. UX matters as much as features. No power-user-only flows.
+4. **Real impact, not adoption-theater.** Success isn't "we have an IDP." Success is *deploy frequency up, lead time down, MTTR down.* Numbers, not aesthetics.
+5. **Small platform-team scope.** Single team, big footprint. The IDP had to multiply our impact, not require us to be present for every consumer.
+
+## Architecture
+
+<IdpDiagram />
+
+Three surfaces, each backed by the real infrastructure beneath:
+
+- **Service Catalog.** Every Cellulant service registered with metadata: owner, runbook, deployment pipeline, monitoring dashboard, SLA tier. Backstage's `catalog-info.yaml` lived in each service repo. A missing entry meant a CI gate failed. Catalog adoption was non-optional by design.
+- **Golden Paths.** Backstage Software Templates that scaffold a new service end-to-end. From `git init` to a canary in production took roughly 10 minutes. The template generated: repository structure, GitLab CI config with the standard pipeline (unit / integration / performance / security), the Terraform module for the service's infra (k8s deployment + ALB slice + RDS allocation if needed), monitoring boilerplate, and the catalog entry. The cheapest possible service was the *correct* possible service.
+- **DX Plugins.** Custom Backstage plugins surfaced GitLab pipeline status, Prometheus dashboards, on-call rotation, and per-service cost breakdown directly in the catalog view. No more "click around to find the dashboard." The cost-per-service plugin is what actually started the conversations that took monthly spend from $175K to $125K — because we could see the bill *per service* instead of per account.
+
+The two design choices I'd defend hardest:
+
+**Catalog registration as a CI gate, not a request.** Services without a valid `catalog-info.yaml` couldn't merge to `main`. This kept the catalog accurate by construction — there was no drift between "what's in production" and "what Backstage knows about." Voluntary catalogues rot. Required ones don't.
+
+**Templates that ship production-grade defaults, not minimum viable scaffolds.** The new-service template included monitoring, alerting, security scanning, and IaC from minute one. We removed the option to ship something half-done. The team that wanted to "just get the service up" got the same hardened defaults as the team that knew the playbook — because there was no second option.
+
+## Result
+
+All measured pre-IDP vs. steady-state-with-IDP, Cellulant Kenya 2022 – 2024:
+
+- **Deploy frequency: 5/day → ~100/day** (20× lift). GitLab CI automation + catalog-aware deploys removed the per-team friction.
+- **Lead time for changes: 2 days → 10 minutes.** Change approval moved from manual sign-off to programmatic — the right gates passing was sufficient evidence.
+- **Change failure rate: −25%.** Rigorous unit / performance / integration testing in the standard pipeline, *before* prod, by default.
+- **MTTR: 5 hours → < 15 minutes.** Service backups, proactive monitoring, automated failover surfaced from the catalog.
+- **Monthly cloud spend: $175K → $125K** ($50K/mo, ~$600K/yr). Right-sized resources, reserved instances, Fargate for spiky workloads, fewer external network calls between internal services — driven by per-service cost visibility in Backstage.
+- **Terraform + Ansible**, owned and operated by the platform team, became the only path to provision infrastructure. Nothing got into production that wasn't IaC.
+
+## What I'd do differently
+
+**Make catalog registration a CI gate from week one, not month four.** We initially asked teams to register voluntarily. It took months to fill in the catalog because teams treated it as paperwork. Once we made registration a gate (no catalog entry → deploy blocked), the catalog filled itself in a week. The lesson isn't that I missed the option — it's that I let optionality survive longer than it deserved.
+
+**Don't over-rely on Backstage TechDocs for runbooks.** TechDocs is great for service-level documentation, but on-call response needed faster surfacing. Three clicks deep is two clicks too many at 3am. We later added a runbook plugin that surfaced the on-call playbook directly in PagerDuty alerts. Should've started there.

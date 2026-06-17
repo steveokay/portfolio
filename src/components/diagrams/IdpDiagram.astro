@@ -1,0 +1,364 @@
+---
+/**
+ * Cellulant Backstage IDP — hand-drawn architecture diagram.
+ *
+ * Three layers:
+ *   1. Developer surface — Developer → Backstage IDP (accent path)
+ *   2. Backstage surfaces — Service Catalog · Golden Paths · DX Plugins
+ *   3. Powered by — Cellulant services · Deploy spine · Observability
+ *
+ * Same field-notebook visual language as the OCI registry diagram:
+ * cream surface, hairline rules, deep-teal accent for the developer
+ * entry path and the Backstage box, CSS-only hover-trace via :has().
+ */
+---
+
+<figure class="not-prose w-full my-10">
+  <svg
+    viewBox="0 0 880 380"
+    role="img"
+    aria-labelledby="idp-diagram-title idp-diagram-desc"
+    class="idp-diagram hidden md:block w-full h-auto"
+    preserveAspectRatio="xMidYMid meet"
+  >
+    <title id="idp-diagram-title">Cellulant Internal Developer Platform on Backstage</title>
+    <desc id="idp-diagram-desc">
+      Engineers interact with Backstage as the single developer surface.
+      Backstage exposes three capabilities: Service Catalog, Golden Paths
+      (Software Templates), and DX Plugins. Behind those capabilities sit
+      the real systems they orchestrate: the Cellulant service repos with
+      their catalog metadata, the deploy spine (GitLab CI, ArgoCD,
+      Terraform), and the observability stack (Prometheus, Grafana,
+      New Relic).
+    </desc>
+
+    <defs>
+      <marker id="id-arrow"
+              viewBox="0 0 10 10" refX="9" refY="5"
+              markerUnits="userSpaceOnUse"
+              markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--rule)"/>
+      </marker>
+      <marker id="id-arrow-muted"
+              viewBox="0 0 10 10" refX="9" refY="5"
+              markerUnits="userSpaceOnUse"
+              markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--muted)"/>
+      </marker>
+      <marker id="id-arrow-accent"
+              viewBox="0 0 10 10" refX="9" refY="5"
+              markerUnits="userSpaceOnUse"
+              markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--accent)"/>
+      </marker>
+    </defs>
+
+    <!-- Faint grid -->
+    <g aria-hidden="true" opacity="0.5">
+      {Array.from({ length: 11 }).map((_, i) => (
+        <line
+          x1={40 + i * 80} y1={20}
+          x2={40 + i * 80} y2={360}
+          stroke="var(--rule)" stroke-width="0.5" stroke-dasharray="1 6"
+        />
+      ))}
+    </g>
+
+    <!-- ===================================================================== -->
+    <!-- ROW 1 — DEVELOPER SURFACE (ACCENT)                                    -->
+    <!-- ===================================================================== -->
+    <text x="80" y="20" font-family="'IBM Plex Mono', monospace"
+          font-size="9" letter-spacing="0.14em" fill="var(--accent)">DEVELOPER SURFACE</text>
+
+    <g class="id-node" data-id="developer">
+      <rect x="80" y="32" width="140" height="50" rx="2"
+            fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+      <text x="92" y="54" font-family="Inter, sans-serif"
+            font-size="12" font-weight="500" fill="var(--ink)">Developer</text>
+      <text x="92" y="70" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">cellulant eng team</text>
+    </g>
+
+    <g class="id-edge id-edge-accent" data-from="developer" data-to="backstage">
+      <line x1="220" y1="57" x2="354" y2="57"
+            stroke="var(--accent)" stroke-width="1.5"
+            marker-end="url(#id-arrow-accent)"/>
+      <text x="287" y="49" text-anchor="middle"
+            font-family="'IBM Plex Mono', monospace" font-size="9"
+            fill="var(--accent)">single entry</text>
+    </g>
+
+    <g class="id-node id-node-accent" data-id="backstage">
+      <rect x="360" y="22" width="280" height="70" rx="2"
+            fill="var(--bg)" stroke="var(--accent)" stroke-width="1.5"/>
+      <text x="376" y="48" font-family="Inter, sans-serif"
+            font-size="14" font-weight="600" fill="var(--ink)">Backstage IDP</text>
+      <text x="376" y="66" font-family="'IBM Plex Mono', monospace"
+            font-size="10" fill="var(--muted)">service catalog · templates · plugins</text>
+      <text x="376" y="82" font-family="'IBM Plex Mono', monospace"
+            font-size="9" letter-spacing="0.1em" fill="var(--accent)">THE PLATFORM SURFACE</text>
+    </g>
+
+    <!-- ===================================================================== -->
+    <!-- ROW 2 — BACKSTAGE SURFACES                                            -->
+    <!-- ===================================================================== -->
+    <g class="id-node" data-id="catalog">
+      <rect x="80" y="160" width="180" height="56" rx="2"
+            fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+      <text x="92" y="182" font-family="Inter, sans-serif"
+            font-size="12" font-weight="500" fill="var(--ink)">Service Catalog</text>
+      <text x="92" y="200" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">owner · runbook · sla</text>
+      <text x="92" y="212" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">catalog-info.yaml in each repo</text>
+    </g>
+
+    <g class="id-node" data-id="paths">
+      <rect x="350" y="160" width="200" height="56" rx="2"
+            fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+      <text x="362" y="182" font-family="Inter, sans-serif"
+            font-size="12" font-weight="500" fill="var(--ink)">Golden Paths</text>
+      <text x="362" y="200" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">software templates · scaffold</text>
+      <text x="362" y="212" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">git init → prod canary in ~10 min</text>
+    </g>
+
+    <g class="id-node" data-id="plugins">
+      <rect x="640" y="160" width="180" height="56" rx="2"
+            fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+      <text x="652" y="182" font-family="Inter, sans-serif"
+            font-size="12" font-weight="500" fill="var(--ink)">DX Plugins</text>
+      <text x="652" y="200" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">ci status · dashboards</text>
+      <text x="652" y="212" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">on-call · cost-per-service</text>
+    </g>
+
+    <!-- ROW 1 → ROW 2 — Backstage fans out into 3 surfaces -->
+    <g class="id-edges id-edges-fanout">
+      <!-- Left branch: Backstage bottom → Catalog top -->
+      <path d="M 500 92 L 500 124 L 170 124 L 170 156"
+            fill="none" stroke="var(--rule)" stroke-width="1"
+            marker-end="url(#id-arrow)"/>
+      <!-- Middle: straight down to Golden Paths -->
+      <path d="M 500 92 L 500 124 L 450 124 L 450 156"
+            fill="none" stroke="var(--rule)" stroke-width="1"
+            marker-end="url(#id-arrow)"/>
+      <!-- Right branch: down to DX Plugins -->
+      <path d="M 500 92 L 500 124 L 730 124 L 730 156"
+            fill="none" stroke="var(--rule)" stroke-width="1"
+            marker-end="url(#id-arrow)"/>
+    </g>
+
+    <!-- ===================================================================== -->
+    <!-- ROW 3 — POWERED BY (real systems Backstage orchestrates)              -->
+    <!-- ===================================================================== -->
+    <text x="80" y="260" font-family="'IBM Plex Mono', monospace"
+          font-size="9" letter-spacing="0.14em" fill="var(--muted)">POWERED BY</text>
+
+    <g class="id-node" data-id="services">
+      <rect x="80" y="272" width="180" height="68" rx="2"
+            fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+      <text x="92" y="294" font-family="Inter, sans-serif"
+            font-size="12" font-weight="500" fill="var(--ink)">Cellulant services</text>
+      <text x="92" y="312" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">java · go · python · php</text>
+      <text x="92" y="326" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">catalog gate at merge</text>
+    </g>
+
+    <g class="id-node" data-id="spine">
+      <rect x="350" y="272" width="200" height="68" rx="2"
+            fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+      <text x="362" y="294" font-family="Inter, sans-serif"
+            font-size="12" font-weight="500" fill="var(--ink)">Deploy spine</text>
+      <text x="362" y="312" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">gitlab ci · argocd · k8s</text>
+      <text x="362" y="326" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">terraform · ansible</text>
+    </g>
+
+    <g class="id-node" data-id="observability">
+      <rect x="640" y="272" width="180" height="68" rx="2"
+            fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+      <text x="652" y="294" font-family="Inter, sans-serif"
+            font-size="12" font-weight="500" fill="var(--ink)">Observability</text>
+      <text x="652" y="312" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">prometheus · grafana</text>
+      <text x="652" y="326" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">new relic · cost panel</text>
+    </g>
+
+    <!-- ROW 2 → ROW 3 — each surface orchestrates its layer-3 system -->
+    <g class="id-edges id-edges-power">
+      <g class="id-edge" data-from="catalog" data-to="services">
+        <line x1="170" y1="216" x2="170" y2="268"
+              stroke="var(--muted)" stroke-width="1"
+              marker-end="url(#id-arrow-muted)"/>
+        <text x="178" y="248" font-family="'IBM Plex Mono', monospace"
+              font-size="9" fill="var(--muted)">indexes</text>
+      </g>
+      <g class="id-edge" data-from="paths" data-to="spine">
+        <line x1="450" y1="216" x2="450" y2="268"
+              stroke="var(--muted)" stroke-width="1"
+              marker-end="url(#id-arrow-muted)"/>
+        <text x="458" y="248" font-family="'IBM Plex Mono', monospace"
+              font-size="9" fill="var(--muted)">scaffolds</text>
+      </g>
+      <g class="id-edge" data-from="plugins" data-to="observability">
+        <line x1="730" y1="216" x2="730" y2="268"
+              stroke="var(--muted)" stroke-width="1"
+              marker-end="url(#id-arrow-muted)"/>
+        <text x="738" y="248" font-family="'IBM Plex Mono', monospace"
+              font-size="9" fill="var(--muted)">surfaces</text>
+      </g>
+    </g>
+  </svg>
+
+  <!-- ===================================================================== -->
+  <!-- Mobile vertical layout                                                -->
+  <!-- ===================================================================== -->
+  <div class="idp-mobile md:hidden">
+    <p class="idp-m-eyebrow idp-m-eyebrow--accent">developer surface</p>
+    <div class="idp-m-accent-col">
+      <div class="idp-m-card">
+        <p class="idp-m-title">Developer</p>
+        <p class="idp-m-meta">cellulant eng team</p>
+      </div>
+      <div class="idp-m-arrow">↓ single entry</div>
+      <div class="idp-m-card idp-m-card--accent">
+        <p class="idp-m-title">Backstage IDP</p>
+        <p class="idp-m-meta">service catalog · templates · plugins</p>
+        <p class="idp-m-badge">THE PLATFORM SURFACE</p>
+      </div>
+    </div>
+
+    <p class="idp-m-eyebrow idp-m-eyebrow--mt">backstage surfaces</p>
+    <div class="idp-m-stack">
+      <div class="idp-m-card">
+        <p class="idp-m-title">Service Catalog</p>
+        <p class="idp-m-meta">owner · runbook · sla · catalog-info.yaml</p>
+      </div>
+      <div class="idp-m-card">
+        <p class="idp-m-title">Golden Paths</p>
+        <p class="idp-m-meta">software templates — git init → prod canary in ~10 min</p>
+      </div>
+      <div class="idp-m-card">
+        <p class="idp-m-title">DX Plugins</p>
+        <p class="idp-m-meta">ci status · dashboards · on-call · cost-per-service</p>
+      </div>
+    </div>
+
+    <p class="idp-m-eyebrow idp-m-eyebrow--mt">powered by</p>
+    <div class="idp-m-stack">
+      <div class="idp-m-card">
+        <p class="idp-m-title">Cellulant services</p>
+        <p class="idp-m-meta">java · go · python · php · catalog gate at merge</p>
+      </div>
+      <div class="idp-m-card">
+        <p class="idp-m-title">Deploy spine</p>
+        <p class="idp-m-meta">gitlab ci · argocd · k8s · terraform · ansible</p>
+      </div>
+      <div class="idp-m-card">
+        <p class="idp-m-title">Observability</p>
+        <p class="idp-m-meta">prometheus · grafana · new relic · cost panel</p>
+      </div>
+    </div>
+  </div>
+
+  <figcaption class="mt-5 max-w-measure font-mono text-meta uppercase tracking-widest text-muted">
+    <span class="hidden md:inline">internal developer platform · hover any box to focus</span>
+    <span class="md:hidden">internal developer platform</span>
+  </figcaption>
+</figure>
+
+<style is:global>
+  /* Desktop hover-trace */
+  .idp-diagram .id-node rect,
+  .idp-diagram .id-node text,
+  .idp-diagram .id-edge {
+    transition: opacity 240ms ease, stroke 240ms ease, stroke-width 240ms ease;
+  }
+  .idp-diagram .id-node { cursor: pointer; }
+  .idp-diagram .id-node rect { pointer-events: all; }
+
+  .idp-diagram:has(.id-node:hover) .id-node:not(:hover) rect,
+  .idp-diagram:has(.id-node:hover) .id-node:not(:hover) text { opacity: 0.4; }
+  .idp-diagram:has(.id-node:hover) .id-edge { opacity: 0.25; }
+
+  .idp-diagram .id-node:hover rect {
+    stroke: var(--accent);
+    stroke-width: 1.5;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .idp-diagram .id-node rect,
+    .idp-diagram .id-node text,
+    .idp-diagram .id-edge { transition: none; }
+  }
+
+  /* Mobile layout */
+  .idp-mobile { font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; }
+  .idp-m-eyebrow {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 0.75rem;
+  }
+  .idp-m-eyebrow--accent { color: var(--accent); }
+  .idp-m-eyebrow--mt { margin-top: 1.75rem; }
+
+  .idp-m-card {
+    border: 1px solid var(--rule);
+    background: var(--bg);
+    border-radius: 2px;
+    padding: 0.6rem 0.75rem;
+  }
+  .idp-m-card--accent { border-color: var(--accent); border-width: 1.5px; }
+
+  .idp-m-title {
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: var(--ink);
+    margin: 0;
+    line-height: 1.2;
+  }
+  .idp-m-meta {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin: 0.2rem 0 0;
+    line-height: 1.35;
+  }
+  .idp-m-badge {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    color: var(--accent);
+    margin: 0.35rem 0 0;
+  }
+  .idp-m-arrow {
+    display: flex; justify-content: center; align-items: center;
+    gap: 0.5rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    padding: 0.3rem 0;
+  }
+  .idp-m-accent-col {
+    border-left: 2px solid var(--accent);
+    padding-left: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .idp-m-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+</style>

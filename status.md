@@ -4,47 +4,51 @@ Clean restart. Old terminal/control-room concept lives in git history (last comm
 
 ---
 
-## Phase 0 — clean slate
+## Phase 0 — clean slate ✓
 
-- [ ] Archive v1 state on a `v1-archive` branch for posterity
-- [ ] Wipe `src/`, `public/`, `astro.config.mjs`, `tailwind.config.mjs`, `tsconfig.json`, `package.json`, `package-lock.json`, `wrangler.jsonc` (preserve `.git`, `.github/`, `.gitignore`, `CLAUDE.md`, `status.md`, memory dir)
-- [ ] Drop node_modules, regenerate from new scaffold
+- [x] Archive v1 state on a `v1-archive` branch for posterity (HEAD = `8196b10`)
+- [x] Wipe `src/`, `public/`, `astro.config.mjs`, `tailwind.config.mjs`, `tsconfig.json`, `package.json`, `package-lock.json`, `wrangler.jsonc`
+- [x] Drop node_modules, regenerate from new scaffold
+- [x] Deploy workflow swapped from Workers SSR → Cloudflare Pages static
 
-## Phase 1 — scaffold
+## Phase 1 — scaffold ✓
 
-- [ ] `npm create astro@latest` — minimal template, TypeScript strict
-- [ ] Install Tailwind CSS 3 + `@astrojs/tailwind`
-- [ ] Install MDX integration: `@astrojs/mdx`
-- [ ] Install fonts: `@fontsource/inter`, `@fontsource/instrument-serif`, `@fontsource/ibm-plex-mono`
-- [ ] Configure color tokens (CSS vars + tailwind theme extension) per CLAUDE.md palette
-- [ ] No SSR adapter — pure static output, deploy to Cloudflare Pages later
+- [x] Astro 5 scaffold, hand-bootstrapped configs (TypeScript strict)
+- [x] Tailwind CSS 3 + `@astrojs/tailwind`
+- [x] MDX integration: `@astrojs/mdx`
+- [x] Sitemap integration: `@astrojs/sitemap`
+- [x] Fonts: `@fontsource/inter` + `instrument-serif` + `ibm-plex-mono`
+- [x] Color tokens (CSS vars + tailwind theme extension) per CLAUDE.md palette
+- [x] No SSR adapter — pure static output
 
 ## Phase 2 — chrome & primitives
 
-- [ ] `Base.astro` layout — minimal header (name only, link to top), `<main>`, minimal footer
-- [ ] Type scale utilities (`text-display`, `text-eyebrow`, `text-meta`)
-- [ ] `Section.astro` primitive — eyebrow + rule + slot for content
-- [ ] `Chip.astro` — monospace metric chip (label + value)
-- [ ] `Rule.astro` — hairline divider with optional label
-- [ ] Global focus-visible style (teal outline, 3px offset)
-- [ ] Print stylesheet skeleton
+- [x] `Base.astro` layout — minimal header (name + contact), `<main>`, minimal footer
+- [x] Type scale utilities (`text-display`, `text-section`, `text-eyebrow`, `text-meta`)
+- [ ] `Section.astro` primitive — eyebrow + rule + slot for content (deferred; sections still inline their own structure)
+- [ ] `Chip.astro` — monospace metric chip (label + value) (deferred; inline in hero for now)
+- [ ] `Rule.astro` — hairline divider with optional label (deferred)
+- [x] Global focus-visible style (teal outline, 3px offset)
+- [x] Print stylesheet (in `global.css`)
+- [x] Optional dark mode (`prefers-color-scheme: dark` only, no toggle)
+- [x] Custom scrollbar (cream track, teal hover)
 
 ## Phase 3 — content sections (home)
 
-- [ ] Hero — name · role · one-line positioning · 3 metric chips · contact CTA
-- [ ] Currently — short paragraph + `status:` line
+- [x] Hero — name · role · one-line positioning · 3 metric chips · contact CTA (v1 copy; metrics chips are still placeholder values)
+- [x] **Currently** — `src/components/sections/Currently.astro`. Paragraph + `status:` + `exploring:` lines. Live teal pulse dot on the status row (reduced-motion safe). Copy is hard-coded in the component file — edit the three string constants at the top to update. **TODO(steve):** swap placeholder copy.
 - [ ] Selected work — 3 case-study cards (problem / stack / result, link to detail)
-- [ ] Cloud & certifications — provider badges (hand-built SVG marks) + dates
-- [ ] Stack — categorized tag groups (alphabetical within each)
+- [x] **Cloud & certifications** — data-driven card grid, `src/components/sections/Certifications.astro` + `src/data/certifications.ts`. Provider mark + status (current/expired auto-flips on date), optional Credly link. Empty array hides the section. **TODO(steve):** swap placeholder certs for real ones in `src/data/certifications.ts`.
+- [x] **Stack diagram** — `src/components/diagrams/StackDiagram.astro`. Desktop: hand-built SVG, AWS region boundary, 3 staggered SMIL pulses on the request path, CSS-only hover-trace via `:has()`. Mobile (<md): real vertical card layout, no horizontal scroll, teal left-rule on the request path column. Reduced-motion safe.
 - [ ] Writing — conditional section, hidden if empty
-- [ ] Contact — email · LinkedIn · GitHub
+- [ ] Contact — email · LinkedIn · GitHub (basic version live; LinkedIn link still TODO)
 
 ## Phase 4 — case studies
 
 - [ ] Content collection schema: `problem`, `constraints`, `architecture`, `result`, `lessons`, `stack[]`, `metrics[]`, `date`
 - [ ] `/work/[slug]` template
 - [ ] Three case-study MDX files scaffolded with structure only (real content to be written by Steve)
-- [ ] Inline SVG architecture diagram per case study (hand-drawn)
+- [ ] Inline SVG architecture diagram per case study (hand-drawn, **same visual language as the Stack diagram** — cream box bg, warm-rule strokes, teal for the highlighted path, sienna reserved for failure-mode emphasis). Static SVG only, hover-trace via CSS sibling selectors — no JS island.
 - [ ] "What I'd do differently" closing block per case study
 
 ## Phase 5 — polish & accessibility
@@ -95,6 +99,19 @@ These were the v1 mistakes — they added complexity for marginal recruiter-faci
 
 ## Open decisions
 
-- Custom domain — `mokaysteve.com`? `steve.eng`? Something else? Decide before Phase 6.
+- Custom domain — `steveokoth.dev` is currently in `astro.config.mjs` as a placeholder. Confirm or swap before Phase 6.
 - Are there any *real* writing posts to link, or does the Writing section stay hidden for v2?
 - Does Steve want a `/now` page (long-form) or just an inline "Currently" block on the home page? Default in CLAUDE.md is inline.
+- LinkedIn URL for footer + contact section.
+
+## Awaiting Steve
+
+- **Real certifications list** — name, provider, earned date (YYYY-MM), expires (YYYY-MM), Credly URL. Drop into `src/data/certifications.ts`.
+- **Real "Currently" copy** — what you're working on right now + what roles you're open to + 3–5 things you're exploring. Edit `src/components/sections/Currently.astro`.
+- **Case-study #1: OCI Image Registry** — the project we noticed at `c:\Users\Athelos\Desktop\claude\image-registry`. Need problem statement, 2–3 hard numbers (tenants, pull/push rate, p99, infra cost), the architectural decision worth telling, the trade-off you *didn't* take, and one "what I'd do differently" line.
+
+## Conventions emerging
+
+- **Data-file pattern** — single-purpose `src/data/*.ts` files for repeated content. Already: `certifications.ts`. Likely next: `caseStudies.ts` (or use a content collection), `writing.ts`.
+- **Section gating** — sections accept their data as props; empty data → section doesn't render. Prevents stubbed-data violations of CLAUDE.md.
+- **Diagrams** — desktop = inline SVG with CSS-only interaction; mobile = vertical card stack in same palette. Established by Stack diagram.

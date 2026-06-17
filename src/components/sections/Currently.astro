@@ -1,0 +1,68 @@
+---
+/**
+ * Currently section — short paragraph + status line.
+ *
+ * Sits between Hero and Stack on the homepage. One paragraph,
+ * one `status:` line, one `exploring:` line.
+ *
+ * TODO(steve): swap the placeholder copy below with real text.
+ * Keep it short — the whole section should read in under 15 seconds.
+ *
+ * The status dot is a CSS-only pulse (reduced-motion safe) — same
+ * teal accent as the Stack diagram's request-path pulses.
+ */
+
+const paragraph =
+  'Leading platform engineering for a small SaaS team — modest headcount, growing AWS footprint. Cleaning up Terraform drift, formalizing the SLO program, and watching the bill.';
+
+const status =
+  'open to senior platform / SRE / staff cloud roles · US remote + select hybrid';
+
+const exploring =
+  'eBPF · OpenTelemetry → Datadog migrations · cost-aware autoscaling';
+---
+
+<section id="currently" class="px-6 py-24 sm:px-10">
+  <div class="mx-auto max-w-wide">
+    <p class="text-eyebrow mb-3">currently</p>
+    <h2 class="text-section">Right now.</h2>
+
+    <p class="mt-6 max-w-measure text-lg text-ink/90">
+      {paragraph}
+    </p>
+
+    <dl class="mt-10 grid grid-cols-1 gap-y-3 sm:grid-cols-[7rem_1fr] sm:gap-x-6 max-w-measure">
+      <dt class="font-mono text-meta uppercase tracking-widest text-muted flex items-center gap-2">
+        <span class="currently-dot" aria-hidden="true"></span>
+        status
+      </dt>
+      <dd class="font-mono text-sm text-ink">{status}</dd>
+
+      <dt class="font-mono text-meta uppercase tracking-widest text-muted">
+        exploring
+      </dt>
+      <dd class="font-mono text-sm text-ink">{exploring}</dd>
+    </dl>
+  </div>
+</section>
+
+<style>
+  .currently-dot {
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: var(--accent);
+    box-shadow: 0 0 0 0 rgba(13, 94, 94, 0.5);
+    animation: currently-pulse 2.4s ease-in-out infinite;
+  }
+
+  @keyframes currently-pulse {
+    0%, 100% { box-shadow: 0 0 0 0   rgba(13, 94, 94, 0.45); }
+    50%      { box-shadow: 0 0 0 5px rgba(13, 94, 94, 0);    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .currently-dot { animation: none; box-shadow: none; }
+  }
+</style>

@@ -1,0 +1,135 @@
+---
+/**
+ * Cloud & certifications section.
+ *
+ * Data-driven: pass a list of certifications and the section renders.
+ * Empty list → the section doesn't render at all (per CLAUDE.md:
+ * "Numbers that aren't yet verified mean the section is hidden, not stubbed.").
+ *
+ * Each cert is rendered as a hand-built badge in the field-notebook
+ * palette — cream surface, hairline border, monospace metadata, the
+ * teal accent reserved for "current" status only. Expired certs show
+ * a sienna `var(--warn)` indicator.
+ *
+ * Verification link is optional; if present, the whole card is a link
+ * with a subtle hover state.
+ */
+
+export interface Cert {
+  /** Issuing provider — keep it terse: 'aws', 'gcp', 'azure', 'hashicorp', 'cncf' */
+  provider: 'aws' | 'gcp' | 'azure' | 'hashicorp' | 'cncf' | 'cka' | 'other';
+  /** Cert title, e.g. 'Solutions Architect — Professional' */
+  title: string;
+  /** ISO date earned, e.g. '2024-09'. Used to compute status. */
+  earned: string;
+  /** ISO date the cert expires (optional). If past today, status flips to 'expired'. */
+  expires?: string;
+  /** Verification URL (Credly etc.). Optional. */
+  url?: string;
+}
+
+interface Props {
+  certifications: Cert[];
+}
+
+const { certifications } = Astro.props;
+
+// Short provider mark — one or two glyph chars, hand-drawn feel
+const PROVIDER_MARK: Record<Cert['provider'], string> = {
+  aws:       'AWS',
+  gcp:       'GCP',
+  azure:     'AZ',
+  hashicorp: 'HC',
+  cncf:      'CNCF',
+  cka:       'K8S',
+  other:     '·',
+};
+
+function statusFor(c: Cert): 'current' | 'expired' {
+  if (!c.expires) return 'current';
+  const now = new Date();
+  return new Date(c.expires) < now ? 'expired' : 'current';
+}
+
+function formatDate(iso: string): string {
+  // Renders '2024-09' verbatim if no day; otherwise '2024-09'
+  return iso.slice(0, 7);
+}
+---
+
+{certifications.length > 0 && (
+  <section id="certifications" class="px-6 py-24 sm:px-10">
+    <div class="mx-auto max-w-wide">
+      <p class="text-eyebrow mb-3">cloud · certifications</p>
+      <h2 class="text-section">Receipts.</h2>
+      <p class="mt-4 max-w-measure text-muted">
+        Current and historical credentials. Dates are when each cert
+        was earned; expirations are renewed before they lapse.
+      </p>
+
+      <ul
+        class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
+        role="list"
+      >
+        {certifications.map((c) => {
+          const status = statusFor(c);
+          const Inner = (
+            <div
+              class={`cert-card group border bg-bg p-4 h-full flex flex-col gap-3 transition-colors duration-240 ${
+                status === 'current'
+                  ? 'border-rule hover:border-accent'
+                  : 'border-rule opacity-75'
+              }`}
+            >
+              <div class="flex items-baseline justify-between gap-3">
+                <span
+                  class={`font-mono text-meta uppercase tracking-widest ${
+                    status === 'current' ? 'text-accent' : 'text-muted'
+                  }`}
+                >
+                  {PROVIDER_MARK[c.provider]}
+                </span>
+                <span class="font-mono text-meta uppercase tracking-widest text-muted">
+                  {status === 'current' ? '● current' : '○ expired'}
+                </span>
+              </div>
+
+              <p class="font-sans text-base font-medium text-ink leading-snug">
+                {c.title}
+              </p>
+
+              <p class="mt-auto font-mono text-meta text-muted">
+                earned&nbsp;
+                <span class="text-ink font-tabular">{formatDate(c.earned)}</span>
+                {c.expires && (
+                  <>
+                    &nbsp;·&nbsp;expires&nbsp;
+                    <span class="text-ink font-tabular">{formatDate(c.expires)}</span>
+                  </>
+                )}
+              </p>
+            </div>
+          );
+
+          return (
+            <li>
+              {c.url ? (
+                <a
+                  href={c.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="block h-full no-underline"
+                  aria-label={`${c.title} — verify`}
+                >
+                  {Inner}
+                </a>
+              ) : (
+                Inner
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  </section>
+)}

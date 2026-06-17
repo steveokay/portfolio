@@ -1,0 +1,638 @@
+---
+/**
+ * Reference AWS platform diagram — hand-drawn, static SVG.
+ * Three layers: deploy plane (top) → runtime / request path (middle, accent)
+ * → data & observability (bottom). All inside a dashed AWS region boundary.
+ *
+ * Interaction (no JS — pure CSS/SMIL):
+ *   • Hover a box → it highlights teal, the rest of the diagram dims so the
+ *     viewer focuses on context. Uses `:has()` so it works without sibling
+ *     restructuring.
+ *   • Continuous accent-path pulse — small teal dots travel from Route 53 →
+ *     ECS Fargate, suggesting live request flow. Staggered so the eye follows.
+ *   • `prefers-reduced-motion: reduce` disables the pulse and transitions.
+ */
+---
+
+<figure class="not-prose w-full">
+  <svg
+    viewBox="0 0 880 360"
+    role="img"
+    aria-labelledby="stack-diagram-title stack-diagram-desc"
+    class="sd-diagram hidden md:block w-full h-auto"
+    preserveAspectRatio="xMidYMid meet"
+  >
+    <title id="stack-diagram-title">
+      Reference AWS platform architecture
+    </title>
+    <desc id="stack-diagram-desc">
+      A typical AWS platform Steve builds and operates: GitHub →
+      GitHub Actions → Terraform Cloud (OIDC, plan / apply) deploying into an
+      AWS us-east-1 region. The request path runs Route 53 → CloudFront → ALB
+      → ECS Fargate, with ECS calling out to RDS Aurora, DynamoDB, CloudWatch,
+      Datadog, and S3.
+    </desc>
+
+    <defs>
+      <marker id="sd-arrow"
+              viewBox="0 0 10 10" refX="9" refY="5"
+              markerUnits="userSpaceOnUse"
+              markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--rule)"/>
+      </marker>
+      <marker id="sd-arrow-muted"
+              viewBox="0 0 10 10" refX="9" refY="5"
+              markerUnits="userSpaceOnUse"
+              markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--muted)"/>
+      </marker>
+      <marker id="sd-arrow-accent"
+              viewBox="0 0 10 10" refX="9" refY="5"
+              markerUnits="userSpaceOnUse"
+              markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--accent)"/>
+      </marker>
+    </defs>
+
+    <!-- =================================================================== -->
+    <!-- Background grid hints — faint dotted backdrop, contained to the SVG -->
+    <!-- =================================================================== -->
+    <g aria-hidden="true" opacity="0.5">
+      {Array.from({ length: 11 }).map((_, i) => (
+        <line
+          x1={40 + i * 80} y1={20}
+          x2={40 + i * 80} y2={340}
+          stroke="var(--rule)" stroke-width="0.5" stroke-dasharray="1 6"
+        />
+      ))}
+    </g>
+
+    <!-- =================================================================== -->
+    <!-- TOP ROW — DEPLOY PLANE                                              -->
+    <!-- =================================================================== -->
+    <g class="sd-row sd-row-deploy">
+      <g class="sd-node" data-id="github">
+        <rect x="40" y="26" width="130" height="48" rx="2"
+              fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+        <text x="52" y="46" font-family="Inter, sans-serif"
+              font-size="11.5" font-weight="500" fill="var(--ink)">GitHub</text>
+        <text x="52" y="62" font-family="'IBM Plex Mono', monospace"
+              font-size="9" fill="var(--muted)">repo · main</text>
+      </g>
+
+      <g class="sd-node" data-id="gha">
+        <rect x="240" y="26" width="160" height="48" rx="2"
+              fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+        <text x="252" y="46" font-family="Inter, sans-serif"
+              font-size="11.5" font-weight="500" fill="var(--ink)">GitHub Actions</text>
+        <text x="252" y="62" font-family="'IBM Plex Mono', monospace"
+              font-size="9" fill="var(--muted)">build · test · deploy</text>
+      </g>
+
+      <g class="sd-node" data-id="tf">
+        <rect x="470" y="26" width="160" height="48" rx="2"
+              fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+        <text x="482" y="46" font-family="Inter, sans-serif"
+              font-size="11.5" font-weight="500" fill="var(--ink)">Terraform Cloud</text>
+        <text x="482" y="62" font-family="'IBM Plex Mono', monospace"
+              font-size="9" fill="var(--muted)">workspaces · drift detection</text>
+      </g>
+    </g>
+
+    <!-- TOP ROW EDGES -->
+    <g class="sd-edges sd-edges-deploy">
+      <g class="sd-edge" data-from="github" data-to="gha">
+        <line x1="170" y1="50" x2="234" y2="50"
+              stroke="var(--rule)" stroke-width="1" marker-end="url(#sd-arrow)"/>
+        <text x="202" y="42" text-anchor="middle"
+              font-family="'IBM Plex Mono', monospace" font-size="9"
+              fill="var(--muted)">push</text>
+      </g>
+
+      <g class="sd-edge" data-from="gha" data-to="tf">
+        <line x1="400" y1="50" x2="464" y2="50"
+              stroke="var(--rule)" stroke-width="1" marker-end="url(#sd-arrow)"/>
+        <text x="432" y="42" text-anchor="middle"
+              font-family="'IBM Plex Mono', monospace" font-size="9"
+              fill="var(--muted)">OIDC</text>
+      </g>
+
+      <g class="sd-edge" data-from="tf" data-to="aws">
+        <line x1="550" y1="74" x2="550" y2="104"
+              stroke="var(--rule)" stroke-width="1" marker-end="url(#sd-arrow)"/>
+        <text x="610" y="92"
+              font-family="'IBM Plex Mono', monospace" font-size="9"
+              fill="var(--muted)">plan / apply</text>
+      </g>
+    </g>
+
+    <!-- =================================================================== -->
+    <!-- AWS REGION BOUNDARY                                                 -->
+    <!-- =================================================================== -->
+    <g class="sd-boundary">
+      <rect x="70" y="108" width="760" height="232" rx="3"
+            fill="none" stroke="var(--rule)" stroke-width="1"
+            stroke-dasharray="4 4"/>
+      <text x="84" y="126" font-family="'IBM Plex Mono', monospace"
+            font-size="9" letter-spacing="0.08em" fill="var(--muted)">AWS · US-EAST-1</text>
+    </g>
+
+    <!-- =================================================================== -->
+    <!-- MIDDLE ROW — REQUEST PATH (ACCENT)                                  -->
+    <!-- =================================================================== -->
+    <text x="100" y="156" font-family="'IBM Plex Mono', monospace"
+          font-size="9" letter-spacing="0.14em" fill="var(--accent)">REQUEST PATH</text>
+
+    <g class="sd-row sd-row-runtime">
+      <g class="sd-node" data-id="r53">
+        <rect x="100" y="170" width="120" height="44" rx="2"
+              fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+        <text x="112" y="190" font-family="Inter, sans-serif"
+              font-size="11.5" font-weight="500" fill="var(--ink)">Route 53</text>
+        <text x="112" y="204" font-family="'IBM Plex Mono', monospace"
+              font-size="9" fill="var(--muted)">dns · health checks</text>
+      </g>
+
+      <g class="sd-node" data-id="cf">
+        <rect x="260" y="170" width="120" height="44" rx="2"
+              fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+        <text x="272" y="190" font-family="Inter, sans-serif"
+              font-size="11.5" font-weight="500" fill="var(--ink)">CloudFront</text>
+        <text x="272" y="204" font-family="'IBM Plex Mono', monospace"
+              font-size="9" fill="var(--muted)">cdn · waf</text>
+      </g>
+
+      <g class="sd-node" data-id="alb">
+        <rect x="420" y="170" width="120" height="44" rx="2"
+              fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+        <text x="432" y="190" font-family="Inter, sans-serif"
+              font-size="11.5" font-weight="500" fill="var(--ink)">ALB</text>
+        <text x="432" y="204" font-family="'IBM Plex Mono', monospace"
+              font-size="9" fill="var(--muted)">tls · routing</text>
+      </g>
+
+      <g class="sd-node sd-node-accent" data-id="ecs">
+        <rect x="580" y="162" width="180" height="60" rx="2"
+              fill="var(--bg)" stroke="var(--accent)" stroke-width="1.5"/>
+        <text x="594" y="184" font-family="Inter, sans-serif"
+              font-size="12" font-weight="600" fill="var(--ink)">ECS Fargate</text>
+        <text x="594" y="200" font-family="'IBM Plex Mono', monospace"
+              font-size="9" fill="var(--muted)">go / node services · autoscale</text>
+        <text x="594" y="214" font-family="'IBM Plex Mono', monospace"
+              font-size="8.5" letter-spacing="0.1em" fill="var(--accent)">APP TIER</text>
+      </g>
+    </g>
+
+    <!-- MIDDLE ROW EDGES (accent) -->
+    <g class="sd-edges sd-edges-runtime">
+      <g class="sd-edge sd-edge-accent" data-from="r53" data-to="cf">
+        <line x1="220" y1="192" x2="254" y2="192"
+              stroke="var(--accent)" stroke-width="1.5"
+              marker-end="url(#sd-arrow-accent)"/>
+      </g>
+      <g class="sd-edge sd-edge-accent" data-from="cf" data-to="alb">
+        <line x1="380" y1="192" x2="414" y2="192"
+              stroke="var(--accent)" stroke-width="1.5"
+              marker-end="url(#sd-arrow-accent)"/>
+      </g>
+      <g class="sd-edge sd-edge-accent" data-from="alb" data-to="ecs">
+        <line x1="540" y1="192" x2="574" y2="192"
+              stroke="var(--accent)" stroke-width="1.5"
+              marker-end="url(#sd-arrow-accent)"/>
+      </g>
+    </g>
+
+    <!-- =================================================================== -->
+    <!-- ANIMATED REQUEST-FLOW PULSES (SMIL, prefers-reduced-motion safe)    -->
+    <!-- Three pulses, staggered, traveling Route53 → CloudFront → ALB → ECS -->
+    <!-- =================================================================== -->
+    <g class="sd-pulses" aria-hidden="true">
+      <!-- Pulse 1 — full path through all 3 accent hops -->
+      <circle r="2.6" fill="var(--accent)" opacity="0">
+        <animate attributeName="opacity"
+                 values="0;1;1;0"
+                 keyTimes="0;0.08;0.92;1"
+                 dur="3.6s" begin="0s" repeatCount="indefinite"/>
+        <animateMotion dur="3.6s" begin="0s" repeatCount="indefinite"
+                       path="M 160 192 L 320 192 L 480 192 L 670 192"/>
+      </circle>
+      <!-- Pulse 2 — staggered by 1.2s -->
+      <circle r="2.6" fill="var(--accent)" opacity="0">
+        <animate attributeName="opacity"
+                 values="0;1;1;0"
+                 keyTimes="0;0.08;0.92;1"
+                 dur="3.6s" begin="1.2s" repeatCount="indefinite"/>
+        <animateMotion dur="3.6s" begin="1.2s" repeatCount="indefinite"
+                       path="M 160 192 L 320 192 L 480 192 L 670 192"/>
+      </circle>
+      <!-- Pulse 3 — staggered by 2.4s -->
+      <circle r="2.6" fill="var(--accent)" opacity="0">
+        <animate attributeName="opacity"
+                 values="0;1;1;0"
+                 keyTimes="0;0.08;0.92;1"
+                 dur="3.6s" begin="2.4s" repeatCount="indefinite"/>
+        <animateMotion dur="3.6s" begin="2.4s" repeatCount="indefinite"
+                       path="M 160 192 L 320 192 L 480 192 L 670 192"/>
+      </circle>
+    </g>
+
+    <!-- =================================================================== -->
+    <!-- BOTTOM ROW — DATA + OBSERVABILITY                                   -->
+    <!-- =================================================================== -->
+    <g class="sd-row sd-row-data">
+      <g class="sd-node" data-id="rds">
+        <rect x="100" y="278" width="130" height="48" rx="2"
+              fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+        <text x="112" y="297" font-family="Inter, sans-serif"
+              font-size="11.5" font-weight="500" fill="var(--ink)">RDS Aurora</text>
+        <text x="112" y="313" font-family="'IBM Plex Mono', monospace"
+              font-size="9" fill="var(--muted)">postgres · multi-az</text>
+      </g>
+
+      <g class="sd-node" data-id="ddb">
+        <rect x="260" y="278" width="120" height="48" rx="2"
+              fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+        <text x="272" y="297" font-family="Inter, sans-serif"
+              font-size="11.5" font-weight="500" fill="var(--ink)">DynamoDB</text>
+        <text x="272" y="313" font-family="'IBM Plex Mono', monospace"
+              font-size="9" fill="var(--muted)">sessions · feature flags</text>
+      </g>
+
+      <g class="sd-node" data-id="cw">
+        <rect x="410" y="278" width="130" height="48" rx="2"
+              fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+        <text x="422" y="297" font-family="Inter, sans-serif"
+              font-size="11.5" font-weight="500" fill="var(--ink)">CloudWatch</text>
+        <text x="422" y="313" font-family="'IBM Plex Mono', monospace"
+              font-size="9" fill="var(--muted)">logs · metrics · alarms</text>
+      </g>
+
+      <g class="sd-node" data-id="dd">
+        <rect x="570" y="278" width="120" height="48" rx="2"
+              fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+        <text x="582" y="297" font-family="Inter, sans-serif"
+              font-size="11.5" font-weight="500" fill="var(--ink)">Datadog</text>
+        <text x="582" y="313" font-family="'IBM Plex Mono', monospace"
+              font-size="9" fill="var(--muted)">apm · traces · slo</text>
+      </g>
+
+      <g class="sd-node" data-id="s3">
+        <rect x="720" y="278" width="100" height="48" rx="2"
+              fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+        <text x="732" y="297" font-family="Inter, sans-serif"
+              font-size="11.5" font-weight="500" fill="var(--ink)">S3</text>
+        <text x="732" y="313" font-family="'IBM Plex Mono', monospace"
+              font-size="9" fill="var(--muted)">artifacts · uploads</text>
+      </g>
+    </g>
+
+    <!-- MIDDLE → BOTTOM EDGES — bus pattern from ECS bottom -->
+    <g class="sd-edges sd-edges-data">
+      <g class="sd-edge" data-from="ecs" data-to="rds">
+        <path d="M 605 222 L 605 252 L 165 252 L 165 274"
+              fill="none" stroke="var(--muted)" stroke-width="1"
+              marker-end="url(#sd-arrow-muted)"/>
+      </g>
+      <g class="sd-edge" data-from="ecs" data-to="ddb">
+        <path d="M 640 222 L 640 256 L 320 256 L 320 274"
+              fill="none" stroke="var(--muted)" stroke-width="1"
+              marker-end="url(#sd-arrow-muted)"/>
+      </g>
+      <g class="sd-edge" data-from="ecs" data-to="cw">
+        <path d="M 680 222 L 680 260 L 475 260 L 475 274"
+              fill="none" stroke="var(--muted)" stroke-width="1"
+              stroke-dasharray="3 3"
+              marker-end="url(#sd-arrow-muted)"/>
+      </g>
+      <g class="sd-edge" data-from="ecs" data-to="dd">
+        <path d="M 720 222 L 720 264 L 630 264 L 630 274"
+              fill="none" stroke="var(--muted)" stroke-width="1"
+              stroke-dasharray="3 3"
+              marker-end="url(#sd-arrow-muted)"/>
+      </g>
+      <g class="sd-edge" data-from="ecs" data-to="s3">
+        <path d="M 750 222 L 750 252 L 770 252 L 770 274"
+              fill="none" stroke="var(--muted)" stroke-width="1"
+              marker-end="url(#sd-arrow-muted)"/>
+      </g>
+
+      <!-- bus labels -->
+      <text x="400" y="248" text-anchor="middle"
+            font-family="'IBM Plex Mono', monospace" font-size="9"
+            fill="var(--muted)">queries · sessions</text>
+      <text x="650" y="248" text-anchor="middle"
+            font-family="'IBM Plex Mono', monospace" font-size="9"
+            fill="var(--muted)">logs · traces · uploads</text>
+    </g>
+  </svg>
+
+  <!-- =================================================================== -->
+  <!-- MOBILE VERTICAL LAYOUT (<md). Same nodes, same palette,             -->
+  <!-- top-to-bottom flow. Pure HTML/CSS — no SVG, no animation.           -->
+  <!-- =================================================================== -->
+  <div class="sd-mobile md:hidden">
+    <!-- DEPLOY PLANE -->
+    <p class="sd-m-eyebrow">deploy</p>
+    <div class="sd-m-col">
+      <div class="sd-m-card">
+        <p class="sd-m-title">GitHub</p>
+        <p class="sd-m-meta">repo · main</p>
+      </div>
+      <div class="sd-m-connector"><span>↓</span><span class="sd-m-edge-label">push</span></div>
+      <div class="sd-m-card">
+        <p class="sd-m-title">GitHub Actions</p>
+        <p class="sd-m-meta">build · test · deploy</p>
+      </div>
+      <div class="sd-m-connector"><span>↓</span><span class="sd-m-edge-label">OIDC</span></div>
+      <div class="sd-m-card">
+        <p class="sd-m-title">Terraform Cloud</p>
+        <p class="sd-m-meta">workspaces · drift detection</p>
+      </div>
+    </div>
+
+    <div class="sd-m-connector sd-m-connector--region">
+      <span>↓</span><span class="sd-m-edge-label">plan / apply</span>
+    </div>
+
+    <!-- AWS REGION BOUNDARY -->
+    <div class="sd-m-region">
+      <p class="sd-m-eyebrow sd-m-eyebrow--region">AWS · US-EAST-1</p>
+
+      <!-- REQUEST PATH -->
+      <p class="sd-m-eyebrow sd-m-eyebrow--accent">request path</p>
+      <div class="sd-m-accent-col">
+        <div class="sd-m-card">
+          <p class="sd-m-title">Route 53</p>
+          <p class="sd-m-meta">dns · health checks</p>
+        </div>
+        <div class="sd-m-connector sd-m-connector--accent"><span>↓</span></div>
+        <div class="sd-m-card">
+          <p class="sd-m-title">CloudFront</p>
+          <p class="sd-m-meta">cdn · waf</p>
+        </div>
+        <div class="sd-m-connector sd-m-connector--accent"><span>↓</span></div>
+        <div class="sd-m-card">
+          <p class="sd-m-title">ALB</p>
+          <p class="sd-m-meta">tls · routing</p>
+        </div>
+        <div class="sd-m-connector sd-m-connector--accent"><span>↓</span></div>
+        <div class="sd-m-card sd-m-card--accent">
+          <p class="sd-m-title">ECS Fargate</p>
+          <p class="sd-m-meta">go / node services · autoscale</p>
+          <p class="sd-m-badge">APP TIER</p>
+        </div>
+      </div>
+
+      <!-- DATA + OBSERVABILITY -->
+      <p class="sd-m-eyebrow sd-m-eyebrow--data">data + observability</p>
+      <div class="sd-m-grid">
+        <div class="sd-m-card">
+          <p class="sd-m-title">RDS Aurora</p>
+          <p class="sd-m-meta">postgres · multi-az</p>
+        </div>
+        <div class="sd-m-card">
+          <p class="sd-m-title">DynamoDB</p>
+          <p class="sd-m-meta">sessions · feature flags</p>
+        </div>
+        <div class="sd-m-card">
+          <p class="sd-m-title">CloudWatch</p>
+          <p class="sd-m-meta">logs · metrics · alarms</p>
+        </div>
+        <div class="sd-m-card">
+          <p class="sd-m-title">Datadog</p>
+          <p class="sd-m-meta">apm · traces · slo</p>
+        </div>
+        <div class="sd-m-card sd-m-card--span">
+          <p class="sd-m-title">S3</p>
+          <p class="sd-m-meta">artifacts · uploads</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <figcaption class="mt-5 max-w-measure font-mono text-meta uppercase tracking-widest text-muted">
+    <span class="hidden md:inline">reference platform · hover any box to focus</span>
+    <span class="md:hidden">reference platform · what I build by default</span>
+  </figcaption>
+</figure>
+
+<style is:global>
+  /* ----------- StackDiagram interaction (CSS-only) ---------------------- */
+
+  /* All transitions consolidated */
+  .sd-diagram .sd-node rect,
+  .sd-diagram .sd-node text,
+  .sd-diagram .sd-edge {
+    transition: opacity 240ms ease, stroke 240ms ease, stroke-width 240ms ease;
+  }
+
+  /* Nodes are hover-targets — make whole <g> area receptive */
+  .sd-diagram .sd-node {
+    cursor: pointer;
+  }
+  .sd-diagram .sd-node rect {
+    pointer-events: all;
+  }
+
+  /* When ANY node is hovered, dim the rest of the diagram so the eye lands */
+  .sd-diagram:has(.sd-node:hover) .sd-node:not(:hover) rect {
+    opacity: 0.45;
+  }
+  .sd-diagram:has(.sd-node:hover) .sd-node:not(:hover) text {
+    opacity: 0.45;
+  }
+  .sd-diagram:has(.sd-node:hover) .sd-edge {
+    opacity: 0.25;
+  }
+  .sd-diagram:has(.sd-node:hover) .sd-boundary,
+  .sd-diagram:has(.sd-node:hover) .sd-pulses {
+    opacity: 0.35;
+  }
+
+  /* Hovered node lights up teal */
+  .sd-diagram .sd-node:hover rect {
+    stroke: var(--accent);
+    stroke-width: 1.5;
+  }
+
+  /* Re-highlight related edges per node id.
+     `:has()` looks for the hovered node within the figure root,
+     then we select edges whose data-from or data-to matches. */
+  .sd-diagram:has(.sd-node[data-id="github"]:hover) .sd-edge[data-from="github"],
+  .sd-diagram:has(.sd-node[data-id="github"]:hover) .sd-edge[data-to="github"],
+  .sd-diagram:has(.sd-node[data-id="gha"]:hover) .sd-edge[data-from="gha"],
+  .sd-diagram:has(.sd-node[data-id="gha"]:hover) .sd-edge[data-to="gha"],
+  .sd-diagram:has(.sd-node[data-id="tf"]:hover) .sd-edge[data-from="tf"],
+  .sd-diagram:has(.sd-node[data-id="tf"]:hover) .sd-edge[data-to="tf"],
+  .sd-diagram:has(.sd-node[data-id="r53"]:hover) .sd-edge[data-from="r53"],
+  .sd-diagram:has(.sd-node[data-id="r53"]:hover) .sd-edge[data-to="r53"],
+  .sd-diagram:has(.sd-node[data-id="cf"]:hover) .sd-edge[data-from="cf"],
+  .sd-diagram:has(.sd-node[data-id="cf"]:hover) .sd-edge[data-to="cf"],
+  .sd-diagram:has(.sd-node[data-id="alb"]:hover) .sd-edge[data-from="alb"],
+  .sd-diagram:has(.sd-node[data-id="alb"]:hover) .sd-edge[data-to="alb"],
+  .sd-diagram:has(.sd-node[data-id="ecs"]:hover) .sd-edge[data-from="ecs"],
+  .sd-diagram:has(.sd-node[data-id="ecs"]:hover) .sd-edge[data-to="ecs"],
+  .sd-diagram:has(.sd-node[data-id="rds"]:hover) .sd-edge[data-from="rds"],
+  .sd-diagram:has(.sd-node[data-id="rds"]:hover) .sd-edge[data-to="rds"],
+  .sd-diagram:has(.sd-node[data-id="ddb"]:hover) .sd-edge[data-from="ddb"],
+  .sd-diagram:has(.sd-node[data-id="ddb"]:hover) .sd-edge[data-to="ddb"],
+  .sd-diagram:has(.sd-node[data-id="cw"]:hover) .sd-edge[data-from="cw"],
+  .sd-diagram:has(.sd-node[data-id="cw"]:hover) .sd-edge[data-to="cw"],
+  .sd-diagram:has(.sd-node[data-id="dd"]:hover) .sd-edge[data-from="dd"],
+  .sd-diagram:has(.sd-node[data-id="dd"]:hover) .sd-edge[data-to="dd"],
+  .sd-diagram:has(.sd-node[data-id="s3"]:hover) .sd-edge[data-from="s3"],
+  .sd-diagram:has(.sd-node[data-id="s3"]:hover) .sd-edge[data-to="s3"] {
+    opacity: 1;
+  }
+
+  /* Related edges also recolor to teal so the path reads clearly */
+  .sd-diagram:has(.sd-node[data-id="github"]:hover) .sd-edge[data-from="github"] line,
+  .sd-diagram:has(.sd-node[data-id="github"]:hover) .sd-edge[data-to="github"] line,
+  .sd-diagram:has(.sd-node[data-id="gha"]:hover) .sd-edge[data-from="gha"] line,
+  .sd-diagram:has(.sd-node[data-id="gha"]:hover) .sd-edge[data-to="gha"] line,
+  .sd-diagram:has(.sd-node[data-id="tf"]:hover) .sd-edge[data-from="tf"] line,
+  .sd-diagram:has(.sd-node[data-id="tf"]:hover) .sd-edge[data-to="tf"] line {
+    stroke: var(--accent);
+    stroke-width: 1.5;
+  }
+  .sd-diagram:has(.sd-node[data-id="ecs"]:hover) .sd-edge[data-from="ecs"] path,
+  .sd-diagram:has(.sd-node[data-id="rds"]:hover) .sd-edge[data-to="rds"] path,
+  .sd-diagram:has(.sd-node[data-id="ddb"]:hover) .sd-edge[data-to="ddb"] path,
+  .sd-diagram:has(.sd-node[data-id="cw"]:hover) .sd-edge[data-to="cw"] path,
+  .sd-diagram:has(.sd-node[data-id="dd"]:hover) .sd-edge[data-to="dd"] path,
+  .sd-diagram:has(.sd-node[data-id="s3"]:hover) .sd-edge[data-to="s3"] path {
+    stroke: var(--accent);
+    stroke-width: 1.3;
+  }
+
+  /* ----------- Reduced-motion + small viewport handling ---------------- */
+
+  @media (prefers-reduced-motion: reduce) {
+    .sd-diagram .sd-pulses { display: none; }
+    .sd-diagram .sd-node rect,
+    .sd-diagram .sd-node text,
+    .sd-diagram .sd-edge {
+      transition: none;
+    }
+  }
+
+  /* ----------- Mobile vertical layout (<md) --------------------------- */
+
+  .sd-mobile {
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  }
+
+  .sd-m-eyebrow {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 0.75rem;
+  }
+  .sd-m-eyebrow--region {
+    margin-bottom: 1rem;
+  }
+  .sd-m-eyebrow--accent {
+    color: var(--accent);
+    margin-top: 0.25rem;
+  }
+  .sd-m-eyebrow--data {
+    margin-top: 1.5rem;
+  }
+
+  /* Top deploy column */
+  .sd-m-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  /* Card */
+  .sd-m-card {
+    border: 1px solid var(--rule);
+    background: var(--bg);
+    border-radius: 2px;
+    padding: 0.6rem 0.75rem;
+    transition: border-color 240ms ease;
+  }
+  .sd-m-card--accent {
+    border-color: var(--accent);
+    border-width: 1.5px;
+  }
+  .sd-m-card--span {
+    grid-column: 1 / -1;
+  }
+  .sd-m-card:hover {
+    border-color: var(--accent);
+  }
+
+  .sd-m-title {
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: var(--ink);
+    line-height: 1.2;
+    margin: 0;
+  }
+  .sd-m-meta {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin: 0.2rem 0 0;
+    line-height: 1.3;
+  }
+  .sd-m-badge {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    color: var(--accent);
+    margin: 0.35rem 0 0;
+  }
+
+  /* Connector (downward arrow + optional label) */
+  .sd-m-connector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.2rem 0;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    line-height: 1;
+  }
+  .sd-m-connector--accent {
+    color: var(--accent);
+  }
+  .sd-m-connector--region {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .sd-m-edge-label {
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  /* AWS region dashed boundary */
+  .sd-m-region {
+    border: 1px dashed var(--rule);
+    border-radius: 3px;
+    padding: 1rem 0.85rem 1.1rem;
+  }
+
+  /* Request-path column — teal left rule */
+  .sd-m-accent-col {
+    border-left: 2px solid var(--accent);
+    padding-left: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  /* Data + obs 2-col grid */
+  .sd-m-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.45rem;
+  }
+</style>

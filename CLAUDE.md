@@ -4,7 +4,7 @@ Guidance for Claude Code working on this repo. Personal portfolio for **Steve Ok
 
 ## Premise
 
-This is a hiring artifact, not an art project. The audience is recruiters and engineering managers at mid-market companies and faang companies hiring for cloud, platform, or infrastructure roles. They skim. They need to see — in under 30 seconds — who Steve is, what cloud, what level, and the evidence.
+This is a hiring artifact, not an art project. The audience is recruiters and engineering managers hiring for cloud, platform, or infrastructure roles — at any scale, from startups to mid-market SaaS to enterprise to FAANG. They skim. They need to see — in under 30 seconds — who Steve is, what cloud, what level, and the evidence.
 
 The site's job is to translate "this person operates real cloud platforms at real scale" into a single confident scroll. Polish, restraint, and concrete numbers carry more weight than visual gimmickry.
 

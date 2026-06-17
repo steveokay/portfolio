@@ -1,0 +1,103 @@
+---
+import Base from '../layouts/Base.astro';
+import Currently from '../components/sections/Currently.astro';
+import StackDiagram from '../components/diagrams/StackDiagram.astro';
+import Certifications from '../components/sections/Certifications.astro';
+import { certifications } from '../data/certifications';
+---
+
+<Base>
+  <section
+    id="hero"
+    class="relative px-6 pb-20 pt-16 sm:px-10 sm:pt-24"
+    aria-label="Introduction"
+  >
+    <!-- Subtle blueprint-dot backdrop, low contrast, decorative only -->
+    <div
+      class="bg-blueprint absolute inset-0 opacity-60 pointer-events-none"
+      aria-hidden="true"
+      style="mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, #000 50%, transparent 100%); -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, #000 50%, transparent 100%);"
+    ></div>
+
+    <div class="relative mx-auto max-w-wide">
+      <p class="text-eyebrow mb-6">cloud · platform · aws</p>
+
+      <h1 class="text-display max-w-3xl">
+        Steve Okoth
+      </h1>
+
+      <p class="mt-3 font-serif text-2xl italic text-muted">
+        Cloud &amp; platform engineer.
+      </p>
+
+      <p class="mt-10 max-w-measure text-lg text-ink/90">
+        I build and run AWS platforms — quietly reliable, cost-aware,
+        and boring on purpose. Eight years across startups, scale-ups,
+        and enterprise — infrastructure, observability, and the kind of
+        incident-response habits that keep teams asleep at 3am.
+      </p>
+
+      <!-- Metric chips -->
+      <ul class="mt-10 flex flex-wrap gap-3 font-mono text-meta uppercase tracking-widest text-muted">
+        <li class="border border-rule bg-surface/60 px-3 py-2">
+          <span class="text-ink font-tabular">8</span>&nbsp;years
+        </li>
+        <li class="border border-rule bg-surface/60 px-3 py-2">
+          <span class="text-ink font-tabular">4</span>&nbsp;certifications
+        </li>
+        <li class="border border-rule bg-surface/60 px-3 py-2">
+          <span class="text-ink font-tabular">$4M+</span>&nbsp;spend managed
+        </li>
+      </ul>
+
+      <p class="mt-10">
+        <a
+          href="#contact"
+          class="inline-block border border-accent bg-accent px-5 py-3 font-mono text-meta uppercase tracking-widest text-bg hover:bg-ink hover:border-ink transition-colors duration-240"
+        >
+          Get in touch &nbsp;→
+        </a>
+      </p>
+    </div>
+  </section>
+
+  <Currently />
+
+  <!-- ============================================================== -->
+  <!-- Stack — early prototype of the v2 diagram                        -->
+  <!-- ============================================================== -->
+  <section id="stack" class="px-6 py-24 sm:px-10">
+    <div class="mx-auto max-w-wide">
+      <p class="text-eyebrow mb-3">stack</p>
+      <h2 class="text-section">What I build by default.</h2>
+      <p class="mt-4 max-w-measure text-muted">
+        Most of my work looks like this — AWS-native, Terraform-managed,
+        observable from the request edge all the way to the slow query.
+        The accent path is the request flow; everything below it
+        supports it.
+      </p>
+
+      <div class="mt-12 border border-rule bg-surface/40 p-6 sm:p-10">
+        <StackDiagram />
+      </div>
+    </div>
+  </section>
+
+  <Certifications certifications={certifications} />
+
+  <!-- Placeholder slot for the rest of the sections — phase 3 work -->
+  <section id="contact" class="px-6 py-32 sm:px-10">
+    <div class="mx-auto max-w-wide">
+      <p class="text-eyebrow mb-3">contact</p>
+      <h2 class="text-section">Reach out.</h2>
+      <p class="mt-4 max-w-measure text-muted">
+        Hiring for a platform or SRE role? Email is fastest.
+      </p>
+      <p class="mt-6 font-mono text-lg">
+        <a href="mailto:mokaysteve@gmail.com" class="text-accent underline-offset-4 hover:underline">
+          mokaysteve@gmail.com
+        </a>
+      </p>
+    </div>
+  </section>
+</Base>

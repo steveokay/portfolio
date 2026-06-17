@@ -45,11 +45,13 @@ Clean restart. Old terminal/control-room concept lives in git history (last comm
 
 ## Phase 4 — case studies
 
-- [ ] Content collection schema: `problem`, `constraints`, `architecture`, `result`, `lessons`, `stack[]`, `metrics[]`, `date`
-- [ ] `/work/[slug]` template
-- [ ] Three case-study MDX files scaffolded with structure only (real content to be written by Steve)
-- [ ] Inline SVG architecture diagram per case study (hand-drawn, **same visual language as the Stack diagram** — cream box bg, warm-rule strokes, teal for the highlighted path, sienna reserved for failure-mode emphasis). Static SVG only, hover-trace via CSS sibling selectors — no JS island.
-- [ ] "What I'd do differently" closing block per case study
+- [x] **Content collection schema** — `src/content/config.ts`. Required: title, eyebrow, oneLiner, stack[], metricHook, year, order. Optional: handle, repo, framing, draft.
+- [x] **`/work/[slug]` template** — `src/pages/work/[slug].astro`. Back link, header (eyebrow + title + handle + framing + one-liner + stack chips + meta row), bespoke `.cs-prose` typography styles for MDX body.
+- [x] **Case study #1: OCI registry** — content live at `/work/oci-registry`. Real numbers: day-3 OCI conformance, ~45 MB mean distroless, 109 commits in 8 days, 22/36 hardening items.
+- [ ] Case study #2 — TBD source project + metrics from Steve.
+- [ ] Case study #3 — TBD source project + metrics from Steve.
+- [x] Inline SVG architecture diagram per case study — `RegistryDiagram.astro` establishes the pattern. Same visual language as Stack diagram: cream surface, hairline rules, teal accent path, dashed mesh boundary, CSS-only `:has()` hover-trace, mobile vertical card layout.
+- [x] "What I'd do differently" closing block per case study — pattern set in `oci-registry.mdx` (two real lessons surfaced from `security.md` hardening items).
 
 ## Phase 5 — polish & accessibility
 

@@ -1,0 +1,398 @@
+---
+/**
+ * Case-study-specific architecture diagram for the OCI registry.
+ * Same field-notebook visual language as the Stack diagram:
+ * cream surface, hairline rules, teal accent for the sync request
+ * path, dashed boundary for the gRPC mesh.
+ *
+ * Smaller than the Stack diagram on purpose — case-study reading
+ * context needs less density. No SMIL pulses; CSS-only hover-trace
+ * via :has().
+ */
+---
+
+<figure class="not-prose w-full my-10">
+  <svg
+    viewBox="0 0 880 380"
+    role="img"
+    aria-labelledby="reg-diagram-title reg-diagram-desc"
+    class="rd-diagram hidden md:block w-full h-auto"
+    preserveAspectRatio="xMidYMid meet"
+  >
+    <title id="reg-diagram-title">OCI registry service mesh</title>
+    <desc id="reg-diagram-desc">
+      Traefik gateway terminates TLS and routes by Host header to the auth
+      service and the OCI core service. Sync paths use gRPC + mTLS to
+      metadata, storage, signer, tenant, and proxy services. Async fan-out
+      uses a RabbitMQ topic exchange to webhook, audit, gc, and scanner.
+      Data plane includes PostgreSQL with row-level security, Redis, and
+      pluggable blob storage. Observability is OpenTelemetry to Jaeger SPM.
+    </desc>
+
+    <defs>
+      <marker id="rd-arrow"
+              viewBox="0 0 10 10" refX="9" refY="5"
+              markerUnits="userSpaceOnUse"
+              markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--rule)"/>
+      </marker>
+      <marker id="rd-arrow-muted"
+              viewBox="0 0 10 10" refX="9" refY="5"
+              markerUnits="userSpaceOnUse"
+              markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--muted)"/>
+      </marker>
+      <marker id="rd-arrow-accent"
+              viewBox="0 0 10 10" refX="9" refY="5"
+              markerUnits="userSpaceOnUse"
+              markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--accent)"/>
+      </marker>
+    </defs>
+
+    <!-- Faint vertical grid -->
+    <g aria-hidden="true" opacity="0.5">
+      {Array.from({ length: 11 }).map((_, i) => (
+        <line
+          x1={40 + i * 80} y1={20}
+          x2={40 + i * 80} y2={360}
+          stroke="var(--rule)" stroke-width="0.5" stroke-dasharray="1 6"
+        />
+      ))}
+    </g>
+
+    <!-- ROW 1 — EDGE -->
+    <g class="rd-node" data-id="client">
+      <rect x="50" y="30" width="120" height="44" rx="2"
+            fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+      <text x="62" y="50" font-family="Inter, sans-serif"
+            font-size="11.5" font-weight="500" fill="var(--ink)">docker · crane</text>
+      <text x="62" y="64" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">client</text>
+    </g>
+
+    <g class="rd-edge rd-edge-accent" data-from="client" data-to="gateway">
+      <line x1="170" y1="52" x2="234" y2="52"
+            stroke="var(--accent)" stroke-width="1.5"
+            marker-end="url(#rd-arrow-accent)"/>
+      <text x="202" y="44" text-anchor="middle"
+            font-family="'IBM Plex Mono', monospace" font-size="9"
+            fill="var(--accent)">/v2/*</text>
+    </g>
+
+    <g class="rd-node rd-node-accent" data-id="gateway">
+      <rect x="240" y="30" width="170" height="44" rx="2"
+            fill="var(--bg)" stroke="var(--accent)" stroke-width="1.5"/>
+      <text x="252" y="50" font-family="Inter, sans-serif"
+            font-size="12" font-weight="600" fill="var(--ink)">gateway</text>
+      <text x="252" y="64" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">traefik · tls · host → tenant</text>
+    </g>
+
+    <g class="rd-edge rd-edge-accent" data-from="gateway" data-to="core">
+      <line x1="410" y1="52" x2="474" y2="52"
+            stroke="var(--accent)" stroke-width="1.5"
+            marker-end="url(#rd-arrow-accent)"/>
+    </g>
+
+    <g class="rd-node rd-node-accent" data-id="core">
+      <rect x="480" y="30" width="160" height="44" rx="2"
+            fill="var(--bg)" stroke="var(--accent)" stroke-width="1.5"/>
+      <text x="492" y="50" font-family="Inter, sans-serif"
+            font-size="12" font-weight="600" fill="var(--ink)">core</text>
+      <text x="492" y="64" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">oci /v2/* push · pull</text>
+    </g>
+
+    <g class="rd-node" data-id="auth">
+      <rect x="670" y="30" width="160" height="44" rx="2"
+            fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+      <text x="682" y="50" font-family="Inter, sans-serif"
+            font-size="11.5" font-weight="500" fill="var(--ink)">auth</text>
+      <text x="682" y="64" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">jwt rs256 · api keys · mtls</text>
+    </g>
+
+    <g class="rd-edge" data-from="core" data-to="auth">
+      <line x1="640" y1="52" x2="664" y2="52"
+            stroke="var(--rule)" stroke-width="1"
+            marker-end="url(#rd-arrow)"/>
+    </g>
+
+    <!-- gRPC MESH BOUNDARY -->
+    <g class="rd-boundary">
+      <rect x="60" y="106" width="790" height="120" rx="3"
+            fill="none" stroke="var(--rule)" stroke-width="1"
+            stroke-dasharray="4 4"/>
+      <text x="74" y="124" font-family="'IBM Plex Mono', monospace"
+            font-size="9" letter-spacing="0.08em" fill="var(--muted)">GRPC + MTLS MESH</text>
+    </g>
+
+    <!-- core → mesh -->
+    <g class="rd-edge" data-from="core" data-to="mesh">
+      <line x1="560" y1="74" x2="560" y2="102"
+            stroke="var(--rule)" stroke-width="1"
+            marker-end="url(#rd-arrow)"/>
+    </g>
+
+    <!-- ROW 2 — MESH SERVICES -->
+    <g class="rd-node" data-id="metadata">
+      <rect x="80" y="140" width="140" height="44" rx="2"
+            fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+      <text x="92" y="160" font-family="Inter, sans-serif"
+            font-size="11.5" font-weight="500" fill="var(--ink)">metadata</text>
+      <text x="92" y="174" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">pg source of truth</text>
+    </g>
+
+    <g class="rd-node" data-id="storage">
+      <rect x="240" y="140" width="140" height="44" rx="2"
+            fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+      <text x="252" y="160" font-family="Inter, sans-serif"
+            font-size="11.5" font-weight="500" fill="var(--ink)">storage</text>
+      <text x="252" y="174" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">grpc stream · pluggable</text>
+    </g>
+
+    <g class="rd-node" data-id="signer">
+      <rect x="400" y="140" width="140" height="44" rx="2"
+            fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+      <text x="412" y="160" font-family="Inter, sans-serif"
+            font-size="11.5" font-weight="500" fill="var(--ink)">signer</text>
+      <text x="412" y="174" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">cosign · notary v2</text>
+    </g>
+
+    <g class="rd-node" data-id="tenant">
+      <rect x="560" y="140" width="130" height="44" rx="2"
+            fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+      <text x="572" y="160" font-family="Inter, sans-serif"
+            font-size="11.5" font-weight="500" fill="var(--ink)">tenant</text>
+      <text x="572" y="174" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">custom domains · dns</text>
+    </g>
+
+    <g class="rd-node" data-id="proxy">
+      <rect x="710" y="140" width="120" height="44" rx="2"
+            fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+      <text x="722" y="160" font-family="Inter, sans-serif"
+            font-size="11.5" font-weight="500" fill="var(--ink)">proxy</text>
+      <text x="722" y="174" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">pull-through cache</text>
+    </g>
+
+    <!-- ROW 3 — ASYNC -->
+    <text x="60" y="250" font-family="'IBM Plex Mono', monospace"
+          font-size="9" letter-spacing="0.14em" fill="var(--muted)">ASYNC · RABBITMQ TOPIC EXCHANGE</text>
+
+    <g class="rd-node" data-id="webhook">
+      <rect x="60" y="266" width="160" height="44" rx="2"
+            fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+      <text x="72" y="286" font-family="Inter, sans-serif"
+            font-size="11.5" font-weight="500" fill="var(--ink)">webhook</text>
+      <text x="72" y="300" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">hmac · retry ladder</text>
+    </g>
+
+    <g class="rd-node" data-id="audit">
+      <rect x="240" y="266" width="160" height="44" rx="2"
+            fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+      <text x="252" y="286" font-family="Inter, sans-serif"
+            font-size="11.5" font-weight="500" fill="var(--ink)">audit</text>
+      <text x="252" y="300" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">append-only · force rls</text>
+    </g>
+
+    <g class="rd-node" data-id="gc">
+      <rect x="420" y="266" width="140" height="44" rx="2"
+            fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+      <text x="432" y="286" font-family="Inter, sans-serif"
+            font-size="11.5" font-weight="500" fill="var(--ink)">gc</text>
+      <text x="432" y="300" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">mark-sweep · advisory locks</text>
+    </g>
+
+    <g class="rd-node" data-id="scanner">
+      <rect x="580" y="266" width="160" height="44" rx="2"
+            fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+      <text x="592" y="286" font-family="Inter, sans-serif"
+            font-size="11.5" font-weight="500" fill="var(--ink)">scanner</text>
+      <text x="592" y="300" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">trivy · jsonrpc</text>
+    </g>
+
+    <!-- core → async bus, dashed -->
+    <g class="rd-edge" data-from="core" data-to="async">
+      <path d="M 560 226 L 560 254"
+            fill="none" stroke="var(--muted)" stroke-width="1"
+            stroke-dasharray="3 3"
+            marker-end="url(#rd-arrow-muted)"/>
+      <text x="568" y="246" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">push.completed</text>
+    </g>
+
+    <!-- DATA PLANE label -->
+    <text x="60" y="345" font-family="'IBM Plex Mono', monospace"
+          font-size="9" letter-spacing="0.14em" fill="var(--muted)">DATA PLANE · POSTGRES (RLS) · REDIS · MINIO / S3 / GCS / AZURE</text>
+  </svg>
+
+  <!-- Mobile vertical layout -->
+  <div class="rd-mobile md:hidden">
+    <p class="rd-m-eyebrow">request path</p>
+    <div class="rd-m-accent-col">
+      <div class="rd-m-card">
+        <p class="rd-m-title">docker · crane</p>
+        <p class="rd-m-meta">client</p>
+      </div>
+      <div class="rd-m-arrow">↓ /v2/*</div>
+      <div class="rd-m-card rd-m-card--accent">
+        <p class="rd-m-title">gateway</p>
+        <p class="rd-m-meta">traefik · tls · host → tenant</p>
+      </div>
+      <div class="rd-m-arrow">↓</div>
+      <div class="rd-m-card rd-m-card--accent">
+        <p class="rd-m-title">core</p>
+        <p class="rd-m-meta">oci /v2/* push · pull</p>
+      </div>
+    </div>
+
+    <p class="rd-m-eyebrow rd-m-eyebrow--mt">gRPC + mTLS mesh</p>
+    <div class="rd-m-grid">
+      <div class="rd-m-card">
+        <p class="rd-m-title">auth</p>
+        <p class="rd-m-meta">jwt · api keys · mtls</p>
+      </div>
+      <div class="rd-m-card">
+        <p class="rd-m-title">metadata</p>
+        <p class="rd-m-meta">pg source of truth</p>
+      </div>
+      <div class="rd-m-card">
+        <p class="rd-m-title">storage</p>
+        <p class="rd-m-meta">grpc stream · pluggable</p>
+      </div>
+      <div class="rd-m-card">
+        <p class="rd-m-title">signer</p>
+        <p class="rd-m-meta">cosign · notary v2</p>
+      </div>
+      <div class="rd-m-card">
+        <p class="rd-m-title">tenant</p>
+        <p class="rd-m-meta">custom domains · dns</p>
+      </div>
+      <div class="rd-m-card">
+        <p class="rd-m-title">proxy</p>
+        <p class="rd-m-meta">pull-through cache</p>
+      </div>
+    </div>
+
+    <p class="rd-m-eyebrow rd-m-eyebrow--mt">async · rabbitmq topic exchange</p>
+    <div class="rd-m-grid">
+      <div class="rd-m-card">
+        <p class="rd-m-title">webhook</p>
+        <p class="rd-m-meta">hmac · retry ladder</p>
+      </div>
+      <div class="rd-m-card">
+        <p class="rd-m-title">audit</p>
+        <p class="rd-m-meta">append-only · force rls</p>
+      </div>
+      <div class="rd-m-card">
+        <p class="rd-m-title">gc</p>
+        <p class="rd-m-meta">mark-sweep · advisory</p>
+      </div>
+      <div class="rd-m-card">
+        <p class="rd-m-title">scanner</p>
+        <p class="rd-m-meta">trivy · jsonrpc</p>
+      </div>
+    </div>
+
+    <p class="rd-m-eyebrow rd-m-eyebrow--mt">
+      data plane · postgres (rls) · redis · minio / s3 / gcs / azure
+    </p>
+  </div>
+
+  <figcaption class="mt-5 max-w-measure font-mono text-meta uppercase tracking-widest text-muted">
+    <span class="hidden md:inline">service mesh · hover any box to focus</span>
+    <span class="md:hidden">service mesh</span>
+  </figcaption>
+</figure>
+
+<style is:global>
+  .rd-diagram .rd-node rect,
+  .rd-diagram .rd-node text,
+  .rd-diagram .rd-edge {
+    transition: opacity 240ms ease, stroke 240ms ease, stroke-width 240ms ease;
+  }
+  .rd-diagram .rd-node { cursor: pointer; }
+  .rd-diagram .rd-node rect { pointer-events: all; }
+
+  .rd-diagram:has(.rd-node:hover) .rd-node:not(:hover) rect,
+  .rd-diagram:has(.rd-node:hover) .rd-node:not(:hover) text {
+    opacity: 0.4;
+  }
+  .rd-diagram:has(.rd-node:hover) .rd-edge { opacity: 0.25; }
+  .rd-diagram:has(.rd-node:hover) .rd-boundary { opacity: 0.4; }
+
+  .rd-diagram .rd-node:hover rect {
+    stroke: var(--accent);
+    stroke-width: 1.5;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rd-diagram .rd-node rect,
+    .rd-diagram .rd-node text,
+    .rd-diagram .rd-edge { transition: none; }
+  }
+
+  /* Mobile vertical layout */
+  .rd-mobile { font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; }
+  .rd-m-eyebrow {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 0.75rem;
+  }
+  .rd-m-eyebrow--mt { margin-top: 1.5rem; }
+
+  .rd-m-card {
+    border: 1px solid var(--rule);
+    background: var(--bg);
+    border-radius: 2px;
+    padding: 0.55rem 0.7rem;
+  }
+  .rd-m-card--accent { border-color: var(--accent); border-width: 1.5px; }
+
+  .rd-m-title {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--ink);
+    margin: 0;
+  }
+  .rd-m-meta {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin: 0.2rem 0 0;
+    line-height: 1.3;
+  }
+  .rd-m-arrow {
+    display: flex; justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent);
+    padding: 0.2rem 0;
+    letter-spacing: 0.1em;
+  }
+  .rd-m-accent-col {
+    border-left: 2px solid var(--accent);
+    padding-left: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .rd-m-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.45rem;
+  }
+</style>

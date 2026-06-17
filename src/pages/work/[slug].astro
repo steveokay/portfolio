@@ -1,0 +1,227 @@
+---
+import { getCollection, render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import Base from '../../layouts/Base.astro';
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const studies = await getCollection('caseStudies', (e) => !e.data.draft);
+  return studies.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+};
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+---
+
+<Base title={`${d.title} — case study`} description={d.oneLiner}>
+  <article class="px-6 py-12 sm:px-10 sm:py-16">
+    <div class="mx-auto max-w-wide">
+      <!-- Back link -->
+      <p class="mb-10">
+        <a
+          href="/#work"
+          class="font-mono text-meta uppercase tracking-widest text-muted hover:text-accent transition-colors duration-240"
+        >
+          ← all work
+        </a>
+      </p>
+
+      <!-- Header -->
+      <header class="cs-header">
+        <p class="text-eyebrow mb-3">{d.eyebrow}</p>
+        <h1 class="text-display max-w-3xl">{d.title}</h1>
+
+        {d.handle && (
+          <p class="mt-2 font-mono text-meta uppercase tracking-widest text-muted">
+            {d.handle}
+          </p>
+        )}
+
+        {d.framing && (
+          <p class="mt-6 font-mono text-meta uppercase tracking-widest text-accent">
+            {d.framing}
+          </p>
+        )}
+
+        <p class="mt-4 max-w-measure font-serif italic text-xl text-muted">
+          {d.oneLiner}
+        </p>
+
+        <!-- Stack chips -->
+        <ul class="mt-8 flex flex-wrap gap-2 max-w-measure" role="list">
+          {d.stack.map((s) => (
+            <li class="border border-rule bg-surface/60 px-2.5 py-1 font-mono text-meta uppercase tracking-widest text-muted">
+              {s}
+            </li>
+          ))}
+        </ul>
+
+        <!-- Meta row -->
+        <dl class="mt-10 grid grid-cols-1 gap-y-3 sm:grid-cols-[7rem_1fr] sm:gap-x-6 max-w-measure">
+          <dt class="font-mono text-meta uppercase tracking-widest text-muted">year</dt>
+          <dd class="font-mono text-sm text-ink">{d.year}</dd>
+
+          <dt class="font-mono text-meta uppercase tracking-widest text-muted">outcome</dt>
+          <dd class="font-mono text-sm text-accent">{d.metricHook}</dd>
+
+          {d.repo && (
+            <>
+              <dt class="font-mono text-meta uppercase tracking-widest text-muted">repo</dt>
+              <dd class="font-mono text-sm">
+                <a
+                  href={d.repo}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-accent underline-offset-4 hover:underline"
+                >
+                  {d.repo.replace(/^https?:\/\//, '')}
+                </a>
+              </dd>
+            </>
+          )}
+        </dl>
+      </header>
+
+      <hr class="mt-14 border-rule" />
+
+      <!-- Body -->
+      <div class="cs-prose mt-14 max-w-measure">
+        <Content />
+      </div>
+    </div>
+  </article>
+</Base>
+
+<style is:global>
+  /* Bespoke prose styles for case-study MDX — matches field-notebook palette */
+  .cs-prose h2 {
+    font-family: 'Instrument Serif', ui-serif, Georgia, serif;
+    font-weight: 400;
+    font-size: clamp(1.5rem, 2.8vw, 2rem);
+    line-height: 1.15;
+    color: var(--ink);
+    margin: 3rem 0 1rem;
+    letter-spacing: -0.005em;
+  }
+  .cs-prose h2:first-child {
+    margin-top: 0;
+  }
+
+  .cs-prose h3 {
+    font-family: 'Instrument Serif', ui-serif, Georgia, serif;
+    font-weight: 400;
+    font-size: 1.35rem;
+    line-height: 1.2;
+    color: var(--ink);
+    margin: 2rem 0 0.75rem;
+  }
+
+  .cs-prose p {
+    color: var(--ink);
+    line-height: 1.7;
+    margin: 0 0 1.1rem;
+  }
+
+  .cs-prose strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .cs-prose em {
+    font-style: italic;
+  }
+
+  .cs-prose a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+  }
+  .cs-prose a:hover {
+    text-decoration-thickness: 2px;
+  }
+
+  .cs-prose ul,
+  .cs-prose ol {
+    margin: 0 0 1.5rem;
+    padding: 0;
+    list-style: none;
+  }
+  .cs-prose ul li,
+  .cs-prose ol li {
+    position: relative;
+    padding-left: 1.25rem;
+    margin-bottom: 0.55rem;
+    line-height: 1.65;
+  }
+  .cs-prose ul li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-size: 0.85em;
+  }
+  .cs-prose ol {
+    counter-reset: cs-ol;
+  }
+  .cs-prose ol li {
+    counter-increment: cs-ol;
+  }
+  .cs-prose ol li::before {
+    content: counter(cs-ol);
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.85em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cs-prose code {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.88em;
+    background: var(--surface);
+    color: var(--ink);
+    padding: 0.1rem 0.35rem;
+    border-radius: 2px;
+    border: 1px solid var(--rule);
+  }
+
+  .cs-prose pre {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 1rem 1.1rem;
+    margin: 0 0 1.5rem;
+    overflow-x: auto;
+    font-size: 0.85rem;
+    line-height: 1.55;
+  }
+  .cs-prose pre code {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    color: var(--ink);
+  }
+
+  .cs-prose blockquote {
+    border-left: 2px solid var(--accent);
+    padding: 0.25rem 0 0.25rem 1rem;
+    margin: 1rem 0;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  .cs-prose hr {
+    border: 0;
+    border-top: 1px solid var(--rule);
+    margin: 2.5rem 0;
+  }
+
+  .cs-prose figure {
+    margin: 2rem 0;
+  }
+</style>

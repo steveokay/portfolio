@@ -1,0 +1,73 @@
+---
+title: 'OCI-compliant, multi-tenant Docker registry'
+handle: 'oci-janus · github.com/steveokay/oci-janus'
+eyebrow: 'case · 01'
+oneLiner: "Off-the-shelf registries assume one customer per deployment. I built one that doesn't."
+stack:
+  - Go
+  - gRPC
+  - PostgreSQL RLS
+  - RabbitMQ
+  - Helm
+  - OpenTelemetry
+metricHook: 'Day-3 OCI v1.1 conformance · 13 services · ~45 MB distroless mean'
+year: '2026'
+order: 1
+framing: 'Solo build · 8 calendar days · 109 commits'
+repo: 'https://github.com/steveokay/oci-janus'
+---
+
+import RegistryDiagram from '../../components/diagrams/RegistryDiagram.astro';
+
+## Problem
+
+Off-the-shelf registries assume one customer per deployment. Docker Hub gates you behind rate limits and account tokens. ECR scopes to a single AWS account. Nexus is paid, Java, and heavyweight. Quay's multi-tenancy is bolted on after the fact. If you're a platform that hosts customer-uploaded container images — a CI provider, a managed-Kubernetes vendor, an internal mirror for an MSP — you're choosing between paying per-tenant for separate registry instances or building one yourself.
+
+I built one to find out what "one yourself" actually costs in 2026.
+
+## Constraints
+
+1. **OCI Distribution Spec v1.1, end-to-end.** `docker`, `podman`, `buildkit`, `skopeo`, `crane` — all of them must Just Work. No bespoke surface area; no client-side shimming.
+2. **Tenants are first-class.** `Host` header → tenant. Two-layer isolation: application code passes `tenant_id` on every query, *and* PostgreSQL row-level security enforces it at the DB so a forgotten filter fails closed instead of leaking.
+3. **Pluggable storage.** Operators pick MinIO, S3, GCS, Azure Blob, or filesystem at deploy time. The registry doesn't care.
+4. **Assume any one service is compromised.** Audit logs survive a malicious app. mTLS between services. Distroless containers, no shell, nothing to drop into.
+5. **Local dev is `docker compose up`. Production is one Helm umbrella chart.** Nothing else.
+
+## Architecture
+
+Thirteen Go services as a small mesh — TLS terminating at a Traefik gateway, sync paths over gRPC + mTLS, async fan-out over a RabbitMQ topic exchange:
+
+<RegistryDiagram />
+
+- **Edge.** `gateway` — Traefik v3 with TLS, Host → tenant resolution, rate-limiting.
+- **Sync API.** `auth` (JWT RS256 + API keys + mTLS); `core` (OCI `/v2/*` push / pull / delete / list); `management` (REST BFF for the React dashboard).
+- **Internal mesh — gRPC + mTLS.** `metadata` (PostgreSQL source of truth); `storage` (gRPC-streaming blob driver over the pluggable backends); `signer` (Cosign + Notary v2, Vault KMS); `tenant` (custom-domain DNS-TXT verification); `proxy` (pull-through cache for upstream registries).
+- **Async — RabbitMQ topic exchange.** `webhook` (HMAC-signed retries on a 5s / 30s / 5m / 30m / 2h ladder, SSRF block-list); `audit` (append-only, `FORCE ROW LEVEL SECURITY`, dedicated low-privilege Postgres role); `gc` (mark-sweep with per-tenant advisory locks); `scanner` (external-process JSON-RPC into Trivy by default).
+- **Data plane.** PostgreSQL 16 with RLS, Redis 7, RabbitMQ Quorum Queues with DLX, MinIO / S3 / etc.
+- **Observability.** OpenTelemetry → Jaeger SPM + Prometheus.
+
+The two design choices I'd defend hardest:
+
+**External-process scanner plugins, not Go `.so` plugins.** `exec.CommandContext`, SHA-256 binary checksum, explicit env allowlist, 10 MB stdout limit. You give up in-process plugin convenience; you keep a sane security model. The class of supply-chain risks that come with dynamic loading of compiled code at runtime just isn't worth the ergonomics.
+
+**Multi-tenant via RLS + advisory locks, not multi-schema or multi-database.** App passes `SET LOCAL app.tenant_id`; PostgreSQL `ENABLE ROW LEVEL SECURITY` enforces it. Bugs that forget the filter fail closed at the DB instead of leaking across tenants. Multi-schema would have multiplied migration cost by N tenants and made cross-tenant analytics painful.
+
+## Result
+
+- **75 / 75 OCI Distribution Spec v1.1 conformance, hit on day 3 of the project.** Architecture was designed against the spec from commit one (the project's `CLAUDE.md` drove the implementation, not the other way around), so there was no spec-discovery phase. Most of the elapsed time was filling in `/v2/*` endpoints in `core`, not figuring out what the spec required.
+- **13 services, mean container image ~45 MB.** Smallest is `gateway` at 37.6 MB; largest is `auth` at 51.6 MB; total registry footprint is ~540 MB across the full distroless deployment. For comparison: the official Distribution `registry:2` is ~24 MB but is single-service and single-tenant; a typical Java/Python registry of comparable feature scope runs 300 – 500 MB. The 14 MB spread between smallest and largest tracks dependency surface area — `auth` carries Argon2id + JWKS + Redis + RBAC; `gateway` is mostly HTTP routing.
+- **109 commits over 8 calendar days** from blank repo to multi-service, OCI-conformant, multi-tenant, signed, scanned, audited registry. Sustainable velocity from a CLAUDE.md-first workflow, not heroics.
+- **80%+ unit-test coverage** across the security-sensitive services (`auth`, `core`, `audit`, `management`).
+- **22 of 36 security hardening items closed.** Tracked explicitly in `security.md` with deferral notes for the rest — not a vague "we'll get to it."
+- **5 pluggable storage backends** (MinIO / S3 / GCS / Azure Blob / filesystem) behind one driver interface; operators choose with `STORAGE_DRIVER=…`.
+- **Distroless, non-root containers**, Go 1.25 builder → `gcr.io/distroless/static-debian12`. No shell. No package manager. Nothing to escalate from.
+
+## What I'd do differently
+
+Two real ones, both surfaced during hardening — and both are the kind of thing you find by chaos-testing before you've shipped, not after.
+
+**Detect connection-pool exhaustion explicitly, opt out of retry.**
+The gRPC retry interceptor amplified load whenever the Postgres pool saturated — `Acquire` blocked, surfaced as `codes.Internal`, the client retried, and the pool got hammered harder. The fix is one line of logic: catch saturation, return `codes.ResourceExhausted`, and configure the interceptor to *not* retry that code. The lesson isn't that I missed it — it's that I designed retry policy before chaos-testing it.
+
+**Don't keep state in memory in a distributed system.**
+The `signer` service originally cached signatures in a `sync.RWMutex` map. A process restart erased them; `VerifyManifest` then 404'd until they were re-signed. The fix is obvious in hindsight: persist day-one — to Postgres, or follow Cosign's model and push signatures as OCI artifacts. The lesson is that volatile distributed state is a footgun even in projects where every other surface is contract-first.

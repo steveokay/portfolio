@@ -93,12 +93,24 @@ const cfAnalyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
       <div class="mx-auto flex max-w-wide flex-col items-start justify-between gap-3 px-6 py-8 font-mono text-meta text-muted sm:flex-row sm:items-center sm:px-10">
         <span>© {new Date().getFullYear()} Steve Okoth</span>
         <div class="flex items-center gap-6">
-          <a href="https://github.com/steveokay" class="hover:text-accent transition-colors duration-240">
+          <a
+            href="https://github.com/steveokay"
+            class="hover:text-accent transition-colors duration-240"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             gh/steveokay
           </a>
-          <a href="mailto:stevieokoth@gmail.com" class="hover:text-accent transition-colors duration-240">
-            email
+          {/* TODO(steve): drop in your LinkedIn URL — then uncomment.
+          <a
+            href="https://linkedin.com/in/steveokoth"
+            class="hover:text-accent transition-colors duration-240"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            linkedin
           </a>
+          */}
         </div>
       </div>
     </footer>

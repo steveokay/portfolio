@@ -193,13 +193,15 @@ function statusFor(c: { expires?: string }): 'current' | 'expired' {
       <p class="resume-role">Cloud &amp; Platform Engineer</p>
 
       <ul class="resume-contact" role="list">
-        <li><a href="mailto:stevieokoth@gmail.com">stevieokoth@gmail.com</a></li>
-        <li><a href="tel:+254714362027">+254 714 362 027</a></li>
-        <li><a href="https://github.com/steveokay">github.com/steveokay</a></li>
+        <li><a href="https://github.com/steveokay" target="_blank" rel="noopener noreferrer">github.com/steveokay</a></li>
         <li>portfolio.mokaysteve.workers.dev</li>
         <!-- TODO(steve): drop in your LinkedIn URL when ready -->
         <!-- <li><a href="https://linkedin.com/in/steveokoth">linkedin.com/in/steveokoth</a></li> -->
       </ul>
+
+      <p class="resume-contact-note">
+        Full CV with email and phone available on direct request via GitHub or LinkedIn.
+      </p>
     </header>
 
     <!-- SUMMARY =========================================================== -->
@@ -373,6 +375,14 @@ function statusFor(c: { expires?: string }): 'current' | 'expired' {
   .resume-contact a:hover {
     text-decoration: underline;
     text-underline-offset: 3px;
+  }
+
+  .resume-contact-note {
+    margin: 0.7rem 0 0;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.02em;
   }
 
   .resume-section {

@@ -60,8 +60,8 @@ Clean restart. Old terminal/control-room concept lives in git history (last comm
 - [x] **OG image** — `public/og.svg` + `public/og.png` (1200×630). Hand-built: cream + blueprint-dot backdrop, "Steve Okoth / Cloud & Platform Engineer" in Georgia, monospace tagline, status-dot URL line. Right side shows a faint architecture-diagram motif (Route 53 → CloudFront → ECS Fargate with teal accent path) so the social preview doubles as a stack hint. PNG generated from SVG via `sharp` (78 KB).
 - [ ] Reading progress on case-study pages (CSS-only `animation-timeline: scroll()` where supported, no JS)
 - [ ] Optional dark mode (`prefers-color-scheme: dark` only — no toggle)
-- [ ] WCAG AA contrast verification (every pair)
-- [ ] Lighthouse 100 / 100 / 100 / 100 on the deployed URL
+- [x] **WCAG AA contrast verification** — Lighthouse a11y audit ran against the live URL; only contrast failure was `opacity-75` dimming on expired cert cards. Removed the opacity (status badge `○ EXPIRED` already differentiates). All other color pairs were already AA.
+- [x] **Lighthouse 100 / 100 / 100 / 100** on `portfolio.mokaysteve.workers.dev` (2026-06-17). Performance 100 (FCP 1.3s, LCP 1.3s, TBT 0ms, CLS 0.01, SI 1.7s, TTFB 190ms); Accessibility 100; Best Practices 100; SEO 100.
 - [ ] Resume PDF route at `/resume.pdf` (rendered via print stylesheet)
 - [ ] OG preview validated on LinkedIn, X, Slack
 

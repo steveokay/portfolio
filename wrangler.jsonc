@@ -1,21 +1,26 @@
 /**
- * Cloudflare Workers configuration — assets-only static deploy.
+ * Cloudflare Workers — static-assets deploy with a passthrough script.
  *
- * No Worker code; `assets.directory` points at the Astro build output.
- * Wrangler serves the static files at portfolio.mokaysteve.workers.dev
- * (and any custom domain bound to this Worker).
+ * The site is fully static (Astro `output: 'static'`), but we keep a
+ * tiny `main` Worker because the existing `portfolio` Worker on
+ * Cloudflare was originally deployed with a script; assets-only mode
+ * causes wrangler to fail the deploy migration. The Worker just hands
+ * every request to the ASSETS binding.
  *
  * https://developers.cloudflare.com/workers/static-assets/
  */
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "portfolio",
+  "account_id": "f9b7066cc77aa72b53680d632d496ed5",
+  "main": "worker/index.js",
   "compatibility_date": "2025-01-15",
-  "assets": {
-    "directory": "./dist",
-    "not_found_handling": "404-page"
-  },
   "observability": {
     "enabled": true
+  },
+  "assets": {
+    "binding": "ASSETS",
+    "directory": "./dist",
+    "not_found_handling": "404-page"
   }
 }

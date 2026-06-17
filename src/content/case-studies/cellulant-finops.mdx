@@ -1,0 +1,77 @@
+---
+title: "Cutting Cellulant's cloud spend without slowing the org"
+handle: 'cellulant · finops · 2023'
+eyebrow: 'case · 03'
+oneLiner: "The AWS bill wasn't a tooling problem. It was a visibility problem."
+stack:
+  - AWS Cost & Usage Reports
+  - Athena
+  - Reserved Instances
+  - Fargate
+  - VPC Endpoints
+  - Backstage
+metricHook: '$175K → $125K / mo · 28% AWS bill cut · zero SLO regression'
+year: '2023'
+order: 3
+framing: 'Senior DevOps Engineer · Cellulant Kenya'
+---
+
+import CostDiagram from '../../components/diagrams/CostDiagram.astro';
+
+## Problem
+
+Cellulant's AWS bill was $175,000 / month and growing 5 – 10% month-on-month as services multiplied. Leadership knew the total. Nobody knew the *why.* A cost-optimization sprint had been proposed twice and shelved both times — not because anyone disagreed it was needed, but because nobody knew where to start. Every conversation ended the same way: "We don't know which service is costing what."
+
+That's not a tooling problem. That's a *visibility* problem. You can't optimize what you can't see.
+
+The whole project, top to bottom, was about making the bill legible — to engineers, not just to finance — and then giving them the levers to act.
+
+## Constraints
+
+1. **No leaving AWS.** Not on the table; the migration cost dwarfed the optimization opportunity.
+2. **No slowing the business.** Services were shipping. Cost optimization couldn't gate or stall feature work.
+3. **SLOs hold.** Any change to a workload's compute shape had to leave its latency and availability budgets intact. A 30% bill cut at the cost of a single user-visible incident was a worse outcome than the bill.
+4. **Continuous practice, not a sprint.** Cost-optimization-as-a-project has a half-life of about six months before drift creeps back. The output had to be a *practice* the org could sustain.
+5. **Per-service visibility is a prerequisite, not a deliverable.** Without it, every optimization conversation is a guess.
+
+## Architecture
+
+<CostDiagram />
+
+The methodology, top to bottom:
+
+**1. Visibility first.** AWS Cost & Usage Reports → S3 → Athena. Tagged every resource by `service`, `team`, and `environment`. Backstage plugin (the same DX surface from the [IDP case study](/work/cellulant-backstage-idp)) showed per-service spend right next to the service catalog entry. Engineers could see *their* bill on the dashboard they already used. The cost conversation moved from finance-to-platform to engineer-to-engineer overnight.
+
+**2. Classify workloads by shape.** For every service, one question: *is the traffic predictable?* Three buckets:
+
+- **Predictable.** Baseline traffic with mild diurnal cycle — payments processing, settlement, scheduled jobs. Money on the table for a 1-year or 3-year commitment.
+- **Spiky / bursty.** Campaigns, async workers, anything event-driven. Reserved Instances would have left capacity idle most of the time.
+- **Internal-only chatter.** Services with no public traffic but heavy service-to-service calls. The bill here was hidden in NAT-gateway egress.
+
+**3. Apply the right lever per bucket.** Four levers, each chosen for the workload it actually fit:
+
+- **Reserved Instances** for the predictable workloads. 1-year commits where the service's lifetime was uncertain; 3-year where it wasn't.
+- **Fargate** for the spiky workloads. Pay per running task instead of per provisioned instance. The "per-vCPU-hour" premium is higher than EC2, but if your task only runs 20% of the day, it's still cheaper. The math is per-workload.
+- **VPC Endpoints** for internal chatter. Many internal services were egressing to AWS APIs (S3, DynamoDB, Secrets Manager) through a NAT gateway by default — paying per-GB transfer for data that never needed to leave the VPC. PrivateLink and gateway endpoints turned that into zero.
+- **Right-sizing.** Cross-cutting. Most services were over-allocated from initial scaffold defaults. 30-day CPU + memory profiling per service; trim to actual usage plus a 30% headroom. Re-run quarterly.
+
+**4. Continuous practice.** Per-service cost in Backstage made the budget owner the engineer who owned the service. Monthly cost-review meeting with the platform team. The four levers became a checklist applied to every new service in the IDP template.
+
+The two design choices I'd defend hardest:
+
+**Per-workload classification before per-workload optimization.** The temptation is to start with the biggest line item and squeeze it. That leads to false economies — buying RIs for a workload that should have been on Fargate, or right-sizing a service that should have moved to a different compute class entirely. Classify first; then choose the lever that fits the shape.
+
+**Move the budget conversation to the engineer who owns the service.** Cost-as-an-engineering-decision is an order of magnitude more durable than cost-as-a-finance-decision. Per-service visibility in the catalog turned every engineer into the budget owner for their service. The decisions moved out of monthly review meetings and into pull requests.
+
+## Result
+
+- **Monthly AWS spend: $175K → $125K** ($50K/month, $600K/year, 28.5% reduction).
+- **Zero SLO regression** through the optimization window. Latency, availability, and error budgets held.
+- **Per-service cost visibility** became cultural. Engineers asked "what's my service's bill?" without being prompted.
+- **The four levers + right-sizing** became part of the new-service template in the IDP (see [case 02](/work/cellulant-backstage-idp)). Cost-aware defaults shipped with every service from minute one.
+
+## What I'd do differently
+
+**Build the visibility infrastructure *before* the optimization, not as part of it.** I spent ~6 weeks on Step 1 (tagging, CUR pipelines, Backstage plugin) and ~10 weeks on Steps 2 – 4 (actual lever application). In hindsight, the visibility piece should have been a month-one infrastructure investment, not a phase-zero of this project. Engineers can't optimize what they can't see — that's the whole thesis — but I didn't apply it to myself when I started.
+
+**Tag everything aggressively from day-one of any new service, with the catalog as the gate.** We retroactively tagged old services to enable cost attribution. That was ~2 weeks of mechanical work that should have been gated into the service template. Cost tags as a CI requirement is the right point of enforcement: no tags → catalog entry rejected → deploy blocked. Same shape as the [catalog-as-CI-gate lesson from case 02](/work/cellulant-backstage-idp). Apply the same enforcement logic to every cross-cutting requirement, not just the one we started with.

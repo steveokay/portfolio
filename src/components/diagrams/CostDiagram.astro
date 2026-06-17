@@ -1,0 +1,370 @@
+---
+/**
+ * Cellulant cost-reduction decision tree.
+ *
+ * Five layers, top to bottom:
+ *   1. All workloads (~$175K/mo source)
+ *   2. Classification: Predictable / Spiky / Internal chatter
+ *   3. Levers: Reserved Instances / Fargate / VPC Endpoints
+ *   4. Cross-cutting: right-sizing band
+ *   5. Result (accent): $175K → $125K / mo
+ *
+ * Different visual shape from the OCI registry (service mesh) and
+ * the Backstage IDP (hub-and-spoke). Same field-notebook palette;
+ * CSS-only :has() hover-trace; no SMIL motion.
+ */
+---
+
+<figure class="not-prose w-full my-10">
+  <svg
+    viewBox="0 0 880 500"
+    role="img"
+    aria-labelledby="cost-diagram-title cost-diagram-desc"
+    class="cost-diagram hidden md:block w-full h-auto"
+    preserveAspectRatio="xMidYMid meet"
+  >
+    <title id="cost-diagram-title">Cellulant cost-reduction decision tree</title>
+    <desc id="cost-diagram-desc">
+      Cellulant's full AWS workload mix at ~$175K/month at the top.
+      Each workload is classified by traffic shape: predictable
+      baseline, spiky/bursty, or internal service-to-service. Each
+      classification gets the lever that fits its shape: Reserved
+      Instances for predictable workloads, Fargate for spiky ones,
+      VPC endpoints for internal chatter. Right-sizing applies across
+      all of them. Result at the bottom: $175K reduced to $125K per
+      month, a 28% bill cut with no SLO regression.
+    </desc>
+
+    <defs>
+      <marker id="co-arrow"
+              viewBox="0 0 10 10" refX="9" refY="5"
+              markerUnits="userSpaceOnUse"
+              markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--rule)"/>
+      </marker>
+      <marker id="co-arrow-muted"
+              viewBox="0 0 10 10" refX="9" refY="5"
+              markerUnits="userSpaceOnUse"
+              markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--muted)"/>
+      </marker>
+      <marker id="co-arrow-accent"
+              viewBox="0 0 10 10" refX="9" refY="5"
+              markerUnits="userSpaceOnUse"
+              markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--accent)"/>
+      </marker>
+    </defs>
+
+    <!-- Faint vertical grid -->
+    <g aria-hidden="true" opacity="0.5">
+      {Array.from({ length: 11 }).map((_, i) => (
+        <line
+          x1={40 + i * 80} y1={20}
+          x2={40 + i * 80} y2={480}
+          stroke="var(--rule)" stroke-width="0.5" stroke-dasharray="1 6"
+        />
+      ))}
+    </g>
+
+    <!-- =================================================================== -->
+    <!-- ROW 1 — ALL WORKLOADS (source)                                      -->
+    <!-- =================================================================== -->
+    <text x="80" y="18" font-family="'IBM Plex Mono', monospace"
+          font-size="9" letter-spacing="0.14em" fill="var(--muted)">DECISION TREE · WORKLOAD → LEVER</text>
+
+    <g class="co-node" data-id="all">
+      <rect x="370" y="30" width="160" height="56" rx="2"
+            fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+      <text x="383" y="54" font-family="Inter, sans-serif"
+            font-size="12" font-weight="500" fill="var(--ink)">All workloads</text>
+      <text x="383" y="72" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">cellulant fleet · ~$175K/mo</text>
+    </g>
+
+    <!-- =================================================================== -->
+    <!-- ROW 2 — CLASSIFICATION                                              -->
+    <!-- =================================================================== -->
+    <g class="co-node" data-id="predictable">
+      <rect x="70" y="140" width="200" height="56" rx="2"
+            fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+      <text x="82" y="164" font-family="Inter, sans-serif"
+            font-size="12" font-weight="500" fill="var(--ink)">Predictable load</text>
+      <text x="82" y="182" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">baseline traffic · diurnal</text>
+    </g>
+
+    <g class="co-node" data-id="spiky">
+      <rect x="340" y="140" width="200" height="56" rx="2"
+            fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+      <text x="352" y="164" font-family="Inter, sans-serif"
+            font-size="12" font-weight="500" fill="var(--ink)">Spiky / bursty</text>
+      <text x="352" y="182" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">campaigns · async jobs</text>
+    </g>
+
+    <g class="co-node" data-id="internal">
+      <rect x="610" y="140" width="200" height="56" rx="2"
+            fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+      <text x="622" y="164" font-family="Inter, sans-serif"
+            font-size="12" font-weight="500" fill="var(--ink)">Internal chatter</text>
+      <text x="622" y="182" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">service-to-service calls</text>
+    </g>
+
+    <!-- ROW 1 → ROW 2 (fan-out from "All workloads") -->
+    <g class="co-edges co-edges-classify">
+      <!-- Left branch -->
+      <path d="M 450 86 L 450 118 L 170 118 L 170 136"
+            fill="none" stroke="var(--rule)" stroke-width="1"
+            marker-end="url(#co-arrow)"/>
+      <!-- Middle -->
+      <path d="M 450 86 L 450 118 L 440 118 L 440 136"
+            fill="none" stroke="var(--rule)" stroke-width="1"
+            marker-end="url(#co-arrow)"/>
+      <!-- Right branch -->
+      <path d="M 450 86 L 450 118 L 710 118 L 710 136"
+            fill="none" stroke="var(--rule)" stroke-width="1"
+            marker-end="url(#co-arrow)"/>
+    </g>
+
+    <!-- =================================================================== -->
+    <!-- ROW 3 — LEVERS                                                      -->
+    <!-- =================================================================== -->
+    <g class="co-node" data-id="ri">
+      <rect x="70" y="240" width="200" height="56" rx="2"
+            fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+      <text x="82" y="264" font-family="Inter, sans-serif"
+            font-size="12" font-weight="500" fill="var(--ink)">Reserved Instances</text>
+      <text x="82" y="282" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">1-yr · 3-yr commits</text>
+    </g>
+
+    <g class="co-node" data-id="fargate">
+      <rect x="340" y="240" width="200" height="56" rx="2"
+            fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+      <text x="352" y="264" font-family="Inter, sans-serif"
+            font-size="12" font-weight="500" fill="var(--ink)">Fargate</text>
+      <text x="352" y="282" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">ecs/eks · pay-per-task</text>
+    </g>
+
+    <g class="co-node" data-id="vpc">
+      <rect x="610" y="240" width="200" height="56" rx="2"
+            fill="var(--bg)" stroke="var(--rule)" stroke-width="1"/>
+      <text x="622" y="264" font-family="Inter, sans-serif"
+            font-size="12" font-weight="500" fill="var(--ink)">VPC Endpoints</text>
+      <text x="622" y="282" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">kill nat egress for s3/dynamo/secrets</text>
+    </g>
+
+    <!-- ROW 2 → ROW 3 — straight vertical -->
+    <g class="co-edges co-edges-levers">
+      <line x1="170" y1="196" x2="170" y2="236"
+            stroke="var(--muted)" stroke-width="1"
+            marker-end="url(#co-arrow-muted)"/>
+      <line x1="440" y1="196" x2="440" y2="236"
+            stroke="var(--muted)" stroke-width="1"
+            marker-end="url(#co-arrow-muted)"/>
+      <line x1="710" y1="196" x2="710" y2="236"
+            stroke="var(--muted)" stroke-width="1"
+            marker-end="url(#co-arrow-muted)"/>
+    </g>
+
+    <!-- =================================================================== -->
+    <!-- ROW 4 — RIGHT-SIZING BAND (cross-cutting)                           -->
+    <!-- =================================================================== -->
+    <g class="co-band">
+      <rect x="70" y="330" width="740" height="40" rx="2"
+            fill="var(--bg)" stroke="var(--rule)" stroke-width="1"
+            stroke-dasharray="4 4"/>
+      <text x="440" y="356" text-anchor="middle"
+            font-family="'IBM Plex Mono', monospace" font-size="11"
+            fill="var(--muted)" letter-spacing="0.06em">
+        + right-sizing &nbsp;·&nbsp; continuous, per-service, 30% headroom
+      </text>
+    </g>
+
+    <!-- ROW 3 → ROW 4 — short verticals into the band -->
+    <g class="co-edges co-edges-rightsize">
+      <line x1="170" y1="296" x2="170" y2="326"
+            stroke="var(--muted)" stroke-width="1" stroke-dasharray="2 3"/>
+      <line x1="440" y1="296" x2="440" y2="326"
+            stroke="var(--muted)" stroke-width="1" stroke-dasharray="2 3"/>
+      <line x1="710" y1="296" x2="710" y2="326"
+            stroke="var(--muted)" stroke-width="1" stroke-dasharray="2 3"/>
+    </g>
+
+    <!-- =================================================================== -->
+    <!-- ROW 5 — RESULT (accent)                                             -->
+    <!-- =================================================================== -->
+    <g class="co-node co-node-accent" data-id="result">
+      <rect x="200" y="410" width="480" height="72" rx="2"
+            fill="var(--bg)" stroke="var(--accent)" stroke-width="1.5"/>
+      <text x="220" y="438" font-family="Inter, sans-serif"
+            font-size="18" font-weight="600" fill="var(--ink)">
+        $175K &nbsp;→&nbsp; $125K
+      </text>
+      <text x="220" y="456" font-family="'IBM Plex Mono', monospace"
+            font-size="10" letter-spacing="0.08em" fill="var(--accent)">PER MONTH</text>
+      <text x="220" y="473" font-family="'IBM Plex Mono', monospace"
+            font-size="9" fill="var(--muted)">
+        28% bill cut · $600K / year · zero SLO regression
+      </text>
+    </g>
+
+    <!-- ROW 4 → ROW 5 -->
+    <g class="co-edges co-edges-result">
+      <line x1="440" y1="370" x2="440" y2="406"
+            stroke="var(--accent)" stroke-width="1.5"
+            marker-end="url(#co-arrow-accent)"/>
+    </g>
+  </svg>
+
+  <!-- Mobile vertical layout -->
+  <div class="cost-mobile md:hidden">
+    <p class="co-m-eyebrow">decision tree · workload → lever</p>
+
+    <div class="co-m-card">
+      <p class="co-m-title">All workloads</p>
+      <p class="co-m-meta">cellulant fleet · ~$175K/mo</p>
+    </div>
+
+    <p class="co-m-eyebrow co-m-eyebrow--mt">classification</p>
+    <div class="co-m-stack">
+      <div class="co-m-card">
+        <p class="co-m-title">Predictable load</p>
+        <p class="co-m-meta">baseline traffic · diurnal</p>
+      </div>
+      <div class="co-m-card">
+        <p class="co-m-title">Spiky / bursty</p>
+        <p class="co-m-meta">campaigns · async jobs</p>
+      </div>
+      <div class="co-m-card">
+        <p class="co-m-title">Internal chatter</p>
+        <p class="co-m-meta">service-to-service calls</p>
+      </div>
+    </div>
+
+    <p class="co-m-eyebrow co-m-eyebrow--mt">levers</p>
+    <div class="co-m-stack">
+      <div class="co-m-card">
+        <p class="co-m-title">Reserved Instances</p>
+        <p class="co-m-meta">1-yr · 3-yr commits — predictable workloads</p>
+      </div>
+      <div class="co-m-card">
+        <p class="co-m-title">Fargate</p>
+        <p class="co-m-meta">ecs/eks · pay-per-task — spiky workloads</p>
+      </div>
+      <div class="co-m-card">
+        <p class="co-m-title">VPC Endpoints</p>
+        <p class="co-m-meta">kill nat egress — internal chatter</p>
+      </div>
+    </div>
+
+    <p class="co-m-band">
+      + right-sizing · continuous, per-service, 30% headroom
+    </p>
+
+    <p class="co-m-eyebrow co-m-eyebrow--accent co-m-eyebrow--mt">result</p>
+    <div class="co-m-card co-m-card--accent">
+      <p class="co-m-result">$175K → $125K / month</p>
+      <p class="co-m-meta">28% bill cut · $600K / year · zero SLO regression</p>
+    </div>
+  </div>
+
+  <figcaption class="mt-5 max-w-measure font-mono text-meta uppercase tracking-widest text-muted">
+    <span class="hidden md:inline">finops decision tree · hover any box to focus</span>
+    <span class="md:hidden">finops decision tree</span>
+  </figcaption>
+</figure>
+
+<style is:global>
+  /* Desktop hover-trace */
+  .cost-diagram .co-node rect,
+  .cost-diagram .co-node text,
+  .cost-diagram .co-edges {
+    transition: opacity 240ms ease, stroke 240ms ease, stroke-width 240ms ease;
+  }
+  .cost-diagram .co-node { cursor: pointer; }
+  .cost-diagram .co-node rect { pointer-events: all; }
+
+  .cost-diagram:has(.co-node:hover) .co-node:not(:hover) rect,
+  .cost-diagram:has(.co-node:hover) .co-node:not(:hover) text { opacity: 0.4; }
+  .cost-diagram:has(.co-node:hover) .co-edges { opacity: 0.3; }
+  .cost-diagram:has(.co-node:hover) .co-band { opacity: 0.45; }
+
+  .cost-diagram .co-node:hover rect {
+    stroke: var(--accent);
+    stroke-width: 1.5;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cost-diagram .co-node rect,
+    .cost-diagram .co-node text,
+    .cost-diagram .co-edges { transition: none; }
+  }
+
+  /* Mobile layout */
+  .cost-mobile { font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; }
+
+  .co-m-eyebrow {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 0.75rem;
+  }
+  .co-m-eyebrow--accent { color: var(--accent); }
+  .co-m-eyebrow--mt { margin-top: 1.75rem; }
+
+  .co-m-card {
+    border: 1px solid var(--rule);
+    background: var(--bg);
+    border-radius: 2px;
+    padding: 0.6rem 0.75rem;
+  }
+  .co-m-card--accent {
+    border-color: var(--accent);
+    border-width: 1.5px;
+    padding: 0.85rem 1rem;
+  }
+
+  .co-m-title {
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: var(--ink);
+    margin: 0;
+    line-height: 1.2;
+  }
+  .co-m-meta {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin: 0.2rem 0 0;
+    line-height: 1.35;
+  }
+  .co-m-result {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0;
+    line-height: 1.1;
+  }
+  .co-m-band {
+    margin: 1.25rem 0 0;
+    padding: 0.6rem 0.85rem;
+    border: 1px dashed var(--rule);
+    border-radius: 2px;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-align: center;
+  }
+  .co-m-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+</style>

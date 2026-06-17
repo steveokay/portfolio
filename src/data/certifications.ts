@@ -17,13 +17,8 @@ export const certifications: Cert[] = [
   {
     provider: 'aws',
     title: 'Cloud Practitioner',
-    // CONFIRM(steve): the CV cites 'AWS Certified Cloud Practitioner' but
-    // doesn't include a specific month. '2024' is a year-only placeholder
-    // based on your AWS-employment window. Drop in the actual month if you
-    // have it (e.g. '2024-03') and the badge will tighten up; same for the
-    // expires field if your real cert window differs.
-    earned: '2024',
-    expires: '2027',
-    // url: 'https://www.credly.com/badges/...',  // add when you have the Credly link
+    earned: '2022-01',
+    expires: '2025-01',
+    url: 'https://www.credly.com/badges/3677c024-4cd0-42fd-9b75-7f62228745e0',
   },
 ];

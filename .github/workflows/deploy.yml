@@ -32,7 +32,16 @@ jobs:
 
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
+        env:
+          WRANGLER_LOG: debug
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          preCommands: |
+            echo "--- wrangler version ---"
+            npx wrangler --version
+            echo "--- auth check ---"
+            npx wrangler whoami || true
+            echo "--- dist contents ---"
+            ls -la dist | head -25
           command: deploy

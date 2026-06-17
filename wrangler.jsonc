@@ -1,11 +1,10 @@
 /**
- * Cloudflare Workers — static-assets deploy with a passthrough script.
+ * Cloudflare Workers — static-site deploy via passthrough Worker.
  *
- * The site is fully static (Astro `output: 'static'`), but we keep a
- * tiny `main` Worker because the existing `portfolio` Worker on
- * Cloudflare was originally deployed with a script; assets-only mode
- * causes wrangler to fail the deploy migration. The Worker just hands
- * every request to the ASSETS binding.
+ * Mirrors the v1 wrangler config (which deployed cleanly) with only the
+ * `main` script path adjusted from the v1 Astro SSR bundle to our v2
+ * 3-line passthrough. Everything every request comes in, the Worker
+ * hands it to env.ASSETS which serves the static dist/.
  *
  * https://developers.cloudflare.com/workers/static-assets/
  */
@@ -15,12 +14,12 @@
   "account_id": "f9b7066cc77aa72b53680d632d496ed5",
   "main": "worker/index.js",
   "compatibility_date": "2025-01-15",
+  "compatibility_flags": ["global_fetch_strictly_public", "nodejs_compat"],
   "observability": {
     "enabled": true
   },
   "assets": {
     "binding": "ASSETS",
-    "directory": "./dist",
-    "not_found_handling": "404-page"
+    "directory": "./dist"
   }
 }

@@ -5,7 +5,7 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://steveokoth.dev',
+  site: 'https://portfolio.mokaysteve.workers.dev',
   output: 'static',
   trailingSlash: 'never',
   integrations: [

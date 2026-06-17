@@ -62,7 +62,7 @@ Clean restart. Old terminal/control-room concept lives in git history (last comm
 - [ ] Optional dark mode (`prefers-color-scheme: dark` only — no toggle)
 - [x] **WCAG AA contrast verification** — Lighthouse a11y audit ran against the live URL; only contrast failure was `opacity-75` dimming on expired cert cards. Removed the opacity (status badge `○ EXPIRED` already differentiates). All other color pairs were already AA.
 - [x] **Lighthouse 100 / 100 / 100 / 100** on `portfolio.mokaysteve.workers.dev` (2026-06-17). Performance 100 (FCP 1.3s, LCP 1.3s, TBT 0ms, CLS 0.01, SI 1.7s, TTFB 190ms); Accessibility 100; Best Practices 100; SEO 100.
-- [ ] Resume PDF route at `/resume.pdf` (rendered via print stylesheet)
+- [x] **Resume route** at `/resume` — single-page CV pulling certifications from `src/data/certifications.ts` and selected projects from the case-study content collection. Print stylesheet renders to a clean US-letter PDF via Ctrl+P / Cmd+P. Header link added next to Contact. **TODO(steve):** fill in the `experience` and `education` arrays at the top of `src/pages/resume.astro`. (Original CLAUDE.md called for the path to be literally `/resume.pdf`; using `/resume` instead since static Astro can't emit a `.pdf` filename and browser save-as-PDF works identically.)
 - [ ] OG preview validated on LinkedIn, X, Slack
 
 ## Phase 6 — ship

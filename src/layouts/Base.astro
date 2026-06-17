@@ -1,6 +1,7 @@
 ---
 import { ViewTransitions } from 'astro:transitions';
 import Cursor from '../components/islands/Cursor';
+import CommandPalette from '../components/islands/CommandPalette';
 import '@fontsource/inter/400.css';
 import '@fontsource/inter/600.css';
 import '@fontsource/jetbrains-mono/400.css';
@@ -95,6 +96,15 @@ const cfAnalyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
 
   <body class="min-h-screen bg-bg text-fg antialiased">
     <Cursor client:load />
+    <CommandPalette client:load />
+    <script>
+      document.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement | null;
+        if (target?.closest('.cmdk-trigger')) {
+          window.dispatchEvent(new CustomEvent('cmdk:open'));
+        }
+      });
+    </script>
     <!-- Boot loader — removed by inline script after animation or instantly if repeat visit -->
     <div id="__loader" aria-hidden="true">
       <div id="__loader-inner">
@@ -145,9 +155,14 @@ const cfAnalyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
           <a href="/#contact" class="hover:text-accent transition-colors duration-150">~/contact</a>
         </nav>
 
-        <span class="text-fg-muted font-tabular hidden sm:block text-[10px]">
-          built: {new Date().toISOString().slice(0, 10)}
-        </span>
+        <button
+          type="button"
+          class="cmdk-trigger flex items-center gap-1.5 text-fg-muted hover:text-accent transition-colors duration-150"
+          aria-label="Open command palette"
+        >
+          <kbd class="border border-border bg-surface px-1.5 py-0.5 text-[10px] leading-none font-mono">⌘K</kbd>
+          <span class="hidden sm:inline text-[10px] uppercase tracking-widest">menu</span>
+        </button>
       </div>
     </div>
 

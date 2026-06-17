@@ -90,3 +90,31 @@
 | 9 | Case study diagrams + content | ✅ |
 | 10 | Work section redesign (featured) | ✅ |
 | 11 | Custom scrollbar | ✅ |
+| 12 | Interactive terminal (typeable commands) | ✅ |
+| 13 | Cloudflare Web Analytics beacon | ✅ |
+| 14 | Sitemap | ✅ |
+
+---
+
+## Awwwards push — next phase
+
+### Tier 1 — high impact, on-brand
+
+- [x] **Command palette (⌘K / Ctrl+K)** — terminal-style palette over everything: 14 commands (section jumps, case studies, GitHub repo, email, copy-url, copy-email). Fuzzy multi-token match across label/description/keywords. ↑↓/Home/End/Enter/Esc keyboard nav. Trigger chip `⌘K menu` in top status bar fires the same `cmdk:open` event. Internal navigation uses `astro:transitions/client` so View Transitions still morph case study titles.
+- [ ] **Bottom status bar** — fixed 24px tmux/powerline-style strip across every page: `uptime · req/s · region · build SHA · UTC clock`. Anchors the "you are inside a system" feeling everywhere, not just hero.
+- [ ] **Distinctive monospace** — swap JetBrains Mono for Berkeley Mono ($75 one-time), Commit Mono (free, ligatures), or Departure Mono (free, retro-tech). Single font swap, large perception shift.
+- [ ] **Streaming SSR case studies** — case study pages stream section-by-section using server islands / Suspense. Feels like the page is *executing* rather than loading.
+
+### Tier 2 — polish that's noticeable
+
+- [ ] **ASCII diff blocks** — case study before/after as unified-diff syntax (`-`/`+` lines) instead of prose. On-brand, scannable, reads as a real postmortem.
+- [ ] **NetworkGraph wired to real data** — packets stop being deterministic, animate from actual GitHub commit frequency / live request rate. Hero graph becomes real-time viz, not decoration.
+- [ ] **Easter-egg terminal commands** — `uptime`, `date`, `top` (rotating fake process list), `tree ./work/`, `cowsay`, `sudo make me coffee`, `vim` (`:q` loop). Hidden behind `help --hidden`.
+- [ ] **Boot sequence varies per visit** — loader rotates from a 20+ line pool, mixes in real deploy SHAs and randomized timing. Returning visitors get fresh content.
+
+### Tier 3 — small wins
+
+- [ ] **Lab section as Grafana-esque dashboard** — sparkline of CPU/memory over 24h (synthetic ok until backend is live), turn the status list into a monitor.
+- [ ] **Reading time + scroll progress on case studies** — `[████░░░░] 41% · 4 min remaining` engineering-coded indicator at top of case study pages.
+- [ ] **Opt-in keystroke sound** — `[♪ sound: off]` toggle in bottom status bar, soft mechanical keys when typing in the terminal. Unforgettable demo moment for reviewers.
+- [ ] **View-source charm** — HTML comment with ASCII logo + "you're reading source, hi: …". Tiny detail, shareable on Twitter/HN.

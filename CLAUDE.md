@@ -1,75 +1,122 @@
 # CLAUDE.md
 
-Guidance for Claude Code (or any agent) working on this repo. This is a personal portfolio site for a devops/backend engineer, aimed at Awwwards-level design. Read this before generating code, components, or copy.
+Guidance for Claude Code working on this repo. Personal portfolio for **Steve Okoth** — cloud / platform engineer targeting mid-market enterprise roles. Read this before generating code, components, or copy.
 
 ## Premise
 
-This is not a "creative dev" portfolio template. The differentiator is that the site's *engineering execution* is the design statement — performance, real data, infra discipline — not illustration or visual gimmicks borrowed from frontend-design portfolios. If a choice doesn't reinforce that, cut it.
+This is a hiring artifact, not an art project. The audience is recruiters and engineering managers at mid-market companies and faang companies hiring for cloud, platform, or infrastructure roles. They skim. They need to see — in under 30 seconds — who Steve is, what cloud, what level, and the evidence.
 
-**Concept:** a control-room / terminal aesthetic — dark, monospace-led, status-light accents, a live systems-health strip instead of a generic hero. Apply it everywhere — type, motion, color, the 404 page, the loading state. Schematic/blueprint-style diagrams are welcome *inside* case studies, but the terminal shell is the frame for the whole site.
+The site's job is to translate "this person operates real cloud platforms at real scale" into a single confident scroll. Polish, restraint, and concrete numbers carry more weight than visual gimmickry.
+
+**Concept:** a *field-notebook* aesthetic — warm cream background, refined serif headlines, monospace for system text, a single deep-teal accent. Reads as engineering documentation, not as a creative-dev portfolio. The differentiator is calm authority, not maximalism.
 
 ## Core principles
 
-- Performance is the thesis, not a checkbox: target ~100 Lighthouse performance/accessibility, fast TTFB, no animation library loaded eagerly if it can be deferred.
-- One concept, fully committed, not a grab-bag of trends.
-- Restraint over density — fewer animations, each one purposeful, all respecting `prefers-reduced-motion`.
-- Real content beats decoration. Case studies and metrics carry the site; visuals support them.
-- Mobile gets its own reimagined layout of the concept, not a shrunk desktop page.
+- **Confident, not loud.** No animated backgrounds, no terminal cliché, no maximalism. Whitespace and typography carry the design.
+- **Receipts over rhetoric.** Every claim ties to a number, a stack, a date, or a link. Nothing vague.
+- **One scroll, one story.** Recruiters won't navigate deep — the homepage carries the entire message. Detail pages exist for hiring managers who lean in.
+- **Print-friendly.** Light mode default; every page screenshots cleanly for an email or Slack share.
+- **Accessibility is non-negotiable.** WCAG AA contrast minimum, full keyboard nav, semantic HTML, real focus rings.
 
 ## Tech stack
 
-- Framework: Astro — static-first, islands architecture. Most pages ship zero JS; interactive pieces (terminal, live metrics widget, network-graph background) are React islands hydrated individually.
-- Styling: Tailwind CSS
-- Animation: Framer Motion within islands for scroll reveals/transitions; only reach for GSAP if choreography needs timeline control Framer can't give
-- Background/3D: React Three Fiber for the network-graph background island — lazy-loaded, never blocking first paint
-- Content: MDX for case studies, so technical writing stays close to code
-- Hosting: the site itself runs on Cloudflare Pages — fast, globally distributed, and not dependent on infrastructure you personally operate
-- Live data: a small, separately-hosted backend service (VPS or homelab) exposes a public API with real metrics — uptime, request counts, last deploy time. The site's live widgets poll this. This is where the "real infra" flex lives, decoupled from the portfolio's own uptime
-- CI/CD: GitHub Actions builds and deploys both the site and the metrics service — the pipeline itself should be visible somewhere on the site, not just internal plumbing
-- IaC: Terraform for the self-hosted metrics service
+- **Framework:** Astro 5, static output only. No SSR adapter, no edge runtime — there is nothing on this site that needs request-time context.
+- **Styling:** Tailwind CSS 3 + CSS custom properties for the color tokens defined below.
+- **Type:** Inter (body), Instrument Serif (display), IBM Plex Mono (code & system labels) — all self-hosted via `@fontsource`.
+- **Content:** MDX for case studies, plain Markdown for `/now` and short notes.
+- **Diagrams:** hand-built inline SVG, committed to the repo. No chart libraries, no Mermaid runtime.
+- **Hosting:** Cloudflare Pages, pure static.
+- **CI/CD:** GitHub Actions — `build`, `astro check`, deploy on push to `main`.
+- **Analytics:** Cloudflare Web Analytics (cookie-less).
+- **Contact:** `mailto:` link only — no form, no backend.
+
+## Visual language
+
+### Color tokens
+
+Defined as CSS variables in `src/styles/global.css` and mirrored in `tailwind.config.mjs`:
+
+```
+--bg:        #faf8f4   /* warm cream, near-white */
+--surface:   #f1ede4   /* card / inset background */
+--ink:       #1a1c1f   /* primary text */
+--muted:     #5a5e63   /* secondary text */
+--rule:      #d8d3c5   /* borders, dividers, hairlines */
+--accent:    #0d5e5e   /* deep teal — links, key metrics, the only accent */
+--warn:      #b06a36   /* warm sienna — diagram emphasis only */
+```
+
+Dark mode is **optional**, respects `prefers-color-scheme`, but the design is authored light-first. If dark mode ships, it inverts surface tones — accent stays teal.
+
+### Typography
+
+- **Display:** Instrument Serif (400 + 400 italic) — hero headline and section titles only.
+- **Body:** Inter (400/500/600), line-height 1.6, max measure ~68 characters.
+- **Mono:** IBM Plex Mono (400/500) — for metric values, code, system text, file paths, dates.
+- Headline size caps at `clamp(2.25rem, 4.5vw, 3.75rem)`. No display larger.
+
+### Motion
+
+- Section entries fade-up 8px over 240ms on first viewport entry. Once each. Never repeats.
+- No parallax. No background animation. No scroll-jacking. No mouse-tracking effects.
+- All animation respects `prefers-reduced-motion`.
 
 ## Site structure
 
-1. **Hero** — live terminal or systems-status strip with real data, not a "Hi, I'm X" banner
-2. **About** — short, framed around scale and impact ("cut p99 latency 40%"), not job titles
-3. **Selected work** — 3–5 case studies in postmortem format: problem, constraints, the architecture decision made, the trade-off *not* taken, a diagram, before/after numbers
-4. **Stack** — rendered as an actual infrastructure diagram, not a logo wall
-5. **Lab / now** — live status of a current project or homelab, proof the systems are real
-6. **Writing** *(optional)* — links to technical posts
-7. **Contact** — minimal, no multi-field form
+A single scroll, top-to-bottom:
 
-## Conventions
+1. **Hero** — Name · role · one-sentence positioning. Three monospace metric chips below (years · certifications · peak scale operated). Single CTA: contact.
+2. **Currently** — One short paragraph and a `status:` line. What Steve is doing right now, what he is open to.
+3. **Selected work** — Three case studies as cards on the home page (problem · stack · result). Each links to `/work/[slug]` for the long version.
+4. **Cloud & certifications** — Provider badges (inline SVG, hand-built minimal marks — not Credly embeds) with dates. AWS / Azure / GCP / Hashicorp where applicable.
+5. **Stack** — Categorized tag groups, alphabetical within each category: Cloud · IaC · Containers & orchestration · Observability · CI/CD · Languages · Data.
+6. **Writing** *(conditional)* — Links to technical posts. Section hidden entirely if the array is empty.
+7. **Contact** — Direct email, LinkedIn, GitHub. Plain text, large enough to copy on mobile.
 
-- Diagrams are SVG, hand-built or generated from architecture-as-code — no stock icon sets
-- Copy is terse and technical — no "passionate," "results-driven," or similar filler
-- Color: near-black background (`#0a0a0a`), warm amber accent (`#ffb000`-ish) — deliberately not the green-on-black hacker cliché. Gradients only when they encode data, never decoratively
-- Typography: monospace for data/labels, a clean sans or serif for body copy
-- Components: one per file, colocated styles, no prop-drilling past two levels — lift to context if needed
+Each section title is a single word in Instrument Serif, with a `1px` rule beneath the eyebrow. Mirrors engineering documentation, not marketing landing pages.
 
-## images
-- if you need to generate any images please use higgsfield
+## Content rules
+
+- **No "passionate" / "results-driven" / "synergy" / "rockstar."** No corporate filler, no LinkedIn voice.
+- **Every metric is real.** Numbers that aren't yet verified mean the section is hidden, not stubbed with `XX%`.
+- **Tense:** present for what *is*, past for case studies, future tense reserved for the "currently open to" line.
+- **Stack lists alphabetical** within each category — predictability over hierarchy.
+- **Cert dates explicit** — `AWS Solutions Architect — Associate · 2024-09`.
+- **Case study format:** Problem → Constraints → Architecture (with diagram) → Result (with numbers) → What I'd do differently. The "what I'd do differently" line is the hiring-manager signal.
+
+## Images
+
+- All generated imagery routes through **Higgsfield** (see the higgsfield-generate skill).
+- The site uses very few images on purpose: an OG/social card (1200×630), optional case-study cover illustrations.
+- **No stock photos. No abstract gradient blobs. No team-photo lookalikes.**
+- Architecture diagrams are inline SVG, hand-built, committed to the repo — not raster images.
 
 ## Non-negotiables
 
-- `prefers-reduced-motion` respected everywhere animation appears
-- WCAG AA contrast minimum, even within the dark/terminal palette
-- No placeholder/Lorem-ipsum metrics in anything shipped to production
-- Custom 404, custom loading state, custom favicon — never framework defaults
+- Lighthouse: **100 / 100 / 100 / 100** on the deployed site. A static page with this little JS has no excuse.
+- WCAG AA contrast on every text/background pair.
+- `prefers-reduced-motion` respected universally.
+- Custom 404, custom favicon, custom OG image — never framework defaults.
+- No tracking beyond Cloudflare Web Analytics.
+- Print stylesheet — the homepage prints cleanly to a single page for screenshot or PDF export.
+- Resume PDF available at `/resume.pdf`, generated from the print view.
 
 ## Commands
 
-*(fill in once the project is scaffolded)*
-
-```
+```bash
 npm install
-npm run dev       # astro dev
-npm run build     # astro build
-npm run preview   # astro preview
+npm run dev        # astro dev
+npm run build      # astro build
+npm run preview    # astro preview
+npm run check      # astro check (type + content validation)
 ```
 
 ## Definition of done
 
-- Lighthouse: ~100 performance, ~100 accessibility
-- Every case study has real, specific numbers
-- CI/CD pipeline is documented or visible on the site itself
-- Mobile layout is intentional, not a responsive afterthought
+- Live on a custom domain, served from Cloudflare Pages
+- Lighthouse 100 across all four categories on the deployed URL
+- Every case study has real numbers, real stack, a real diagram, and a "what I'd do differently" line
+- Every certification listed is real and dated
+- OG preview renders correctly on LinkedIn, X, and Slack
+- Mobile single-column, scannable without horizontal scroll, large enough to read without zoom
+- Tested by at least one non-engineer reader for skimmability

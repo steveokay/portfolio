@@ -210,13 +210,9 @@ function statusFor(c: { expires?: string }): 'current' | 'expired' {
     </section>
 
     <!-- EXPERIENCE ======================================================== -->
-    <section class="resume-section">
-      <h2 class="resume-section-title">experience</h2>
-      {experience.length === 0 ? (
-        <p class="resume-todo">
-          [&nbsp;todo:&nbsp; populate <code>experience</code> in <code>src/pages/resume.astro</code> with your real role history. Each role takes: company, title, start (YYYY-MM), end (YYYY-MM or 'present'), location, and 2–4 highlight bullets.&nbsp;]
-        </p>
-      ) : (
+    {experience.length > 0 && (
+      <section class="resume-section">
+        <h2 class="resume-section-title">experience</h2>
         <ul class="resume-roles" role="list">
           {experience.map((r) => (
             <li class="resume-role-entry">
@@ -233,8 +229,8 @@ function statusFor(c: { expires?: string }): 'current' | 'expired' {
             </li>
           ))}
         </ul>
-      )}
-    </section>
+      </section>
+    )}
 
     <!-- SELECTED PROJECTS ================================================= -->
     {studies.length > 0 && (
@@ -302,13 +298,9 @@ function statusFor(c: { expires?: string }): 'current' | 'expired' {
     </section>
 
     <!-- EDUCATION ========================================================= -->
-    <section class="resume-section">
-      <h2 class="resume-section-title">education</h2>
-      {education.length === 0 ? (
-        <p class="resume-todo">
-          [&nbsp;todo:&nbsp; populate <code>education</code> in <code>src/pages/resume.astro</code>.&nbsp;]
-        </p>
-      ) : (
+    {education.length > 0 && (
+      <section class="resume-section">
+        <h2 class="resume-section-title">education</h2>
         <ul class="resume-education" role="list">
           {education.map((e) => (
             <li class="resume-edu-entry">
@@ -318,8 +310,8 @@ function statusFor(c: { expires?: string }): 'current' | 'expired' {
             </li>
           ))}
         </ul>
-      )}
-    </section>
+      </section>
+    )}
   </article>
 </Base>
 

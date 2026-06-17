@@ -75,10 +75,8 @@ function formatDate(iso: string): string {
           const status = statusFor(c);
           const Inner = (
             <div
-              class={`cert-card group border bg-bg p-4 h-full flex flex-col gap-3 transition-colors duration-240 ${
-                status === 'current'
-                  ? 'border-rule hover:border-accent'
-                  : 'border-rule opacity-75'
+              class={`cert-card group border bg-bg p-4 h-full flex flex-col gap-3 transition-colors duration-240 border-rule ${
+                status === 'current' ? 'hover:border-accent' : ''
               }`}
             >
               <div class="flex items-baseline justify-between gap-3">

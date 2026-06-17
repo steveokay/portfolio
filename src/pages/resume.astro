@@ -12,10 +12,12 @@ import { certifications } from '../data/certifications';
 /* -------------------------------------------------------------------------- */
 
 const summary =
-  'Senior cloud / platform engineer. Eight years across startups, scale-ups, ' +
-  'and enterprise — building and operating AWS platforms that are quietly ' +
-  'reliable, cost-aware, and observable end-to-end. AWS-first; comfortable ' +
-  'in Azure and GCP.';
+  'Cloud Infrastructure Engineer with ten years across software engineering, ' +
+  'DevOps, and cloud platform work. AWS Certified. Track record cutting cloud ' +
+  'spend, accelerating deployment cadence, and tightening incident response — ' +
+  '$50K/month saved, deploy frequency from 5 to 100/day, MTTR from 5 hours to ' +
+  '15 minutes. Comfortable across AWS, GCP, and Azure; Terraform, Ansible, ' +
+  'Kubernetes, ArgoCD.';
 
 interface Role {
   company: string;
@@ -27,18 +29,106 @@ interface Role {
 }
 
 const experience: Role[] = [
-  // {
-  //   company: 'Acme SaaS',
-  //   title: 'Senior Platform Engineer',
-  //   start: '2024-01',
-  //   end: 'present',
-  //   location: 'Remote',
-  //   highlights: [
-  //     'Led migration of …',
-  //     'Cut $X/mo in AWS spend via …',
-  //     'SLO program: … 99.95% on the request path',
-  //   ],
-  // },
+  {
+    company: 'Tala',
+    title: 'Cloud Infrastructure Engineer II',
+    start: '2025-03',
+    end: 'present',
+    highlights: [
+      'Lead automation of infrastructure and platform services across AWS, GCP, and Azure with Terraform and Ansible.',
+      'Architect new infra and platform solutions; deliver alongside development teams.',
+      'Design and run continuous deployment on Kubernetes via ArgoCD and Jenkins.',
+      'Application-performance alerting in Datadog and ElasticSearch — catch issues before they reach end users.',
+      'On-call rotation; incident response and post-incident hardening.',
+    ],
+  },
+  {
+    company: 'Amazon Web Services',
+    title: 'Cloud Support Engineer — Containers',
+    start: '2024-05',
+    end: '2025-03',
+    highlights: [
+      'Resolved customer cases for AWS container services across phone, email, and live chat.',
+      'Advanced troubleshooting to dive into root cause on complex container / orchestration issues.',
+      'Partnered with development teams on complex escalations and contact-deflection initiatives.',
+      'Wrote internal tools / scripts to streamline team workflows; contributed to process and policy compliance.',
+    ],
+  },
+  {
+    company: 'Cellulant Kenya',
+    title: 'Senior DevOps Engineer',
+    start: '2021-10',
+    end: '2024-05',
+    highlights: [
+      'Lifted deployment frequency from 5/day to ~100/day by automating the release pipeline in GitLab CI.',
+      'Cut lead time for changes from 2 days to 10 minutes by automating the change-approval flow.',
+      'Reduced change failure rate by 25% with rigorous unit / integration / performance gates before prod.',
+      'Cut MTTR from 5 hours to under 15 minutes — service backups, proactive monitoring, automated failover.',
+      'Reduced monthly cloud spend from $175K to $125K via right-sizing, reserved instances, and Fargate for spiky workloads.',
+      'Built an internal developer platform on Backstage — bootstrapping scripts, infra catalog, golden paths.',
+      'Automated all infrastructure provisioning in Terraform + Ansible.',
+    ],
+  },
+  {
+    company: 'Finserve Africa',
+    title: 'Product Support Technical Lead',
+    start: '2021-05',
+    end: '2021-10',
+    highlights: [
+      'Improved system uptime by 25% via better monitoring and proactive incident response.',
+      'Led the go-live of Jenga API and Jenga Payment Gateway integrations.',
+      'Streamlined support process — cut issue resolution time by 40%.',
+      'Enforced rigorous pre-release testing across product surfaces.',
+    ],
+  },
+  {
+    company: 'NCBA Bank Kenya',
+    title: 'Integration Specialist',
+    start: '2020-09',
+    end: '2021-04',
+    highlights: [
+      'Hit 98% SLA adherence across service-lifecycle management.',
+      'Cut integration errors by 30% and improved API response times by 25%.',
+      'Integrated four key systems; cross-functional response time up 35%.',
+      'Hardened security posture — 15% drop in security-related incidents.',
+    ],
+  },
+  {
+    company: 'Cellulant Kenya',
+    title: 'HUB SIP Engineer',
+    start: '2018-12',
+    end: '2020-09',
+    highlights: [
+      'Ran disaster-recovery drills; validated system resilience.',
+      'Cut application incidents by 20% via proactive monitoring.',
+      'New deployment strategy reduced system downtime by 15%.',
+      'Documentation overhaul — 25% drop in time-to-troubleshoot.',
+    ],
+  },
+  {
+    company: 'Sanergy',
+    title: 'Software Engineer',
+    start: '2018-03',
+    end: '2018-11',
+    highlights: [
+      'Streamlined the software release process — 20% reduction in errors.',
+      'Code-optimization measures improved system performance by 15%.',
+      'Led a team on a new module — 30% lift in user satisfaction.',
+    ],
+  },
+  {
+    company: 'Stanbic Bank Kenya',
+    title: 'Software Engineer',
+    start: '2016-08',
+    end: '2017-11',
+    highlights: [
+      'Contributed to the Payments and Collections initiative that materially grew the bank’s liabilities within the year.',
+      'Built the Receipt Referencing System — direct integrations with schools and businesses; drove deposit growth.',
+      'Integrated the bank’s tea-trading system to Equity Bank.',
+      'Customer risk-rating tool to score risk on loan and account products.',
+      'Self-service insurance-renewal flow for staff.',
+    ],
+  },
 ];
 
 interface Education {
@@ -57,13 +147,13 @@ const education: Education[] = [
 
 /* Stack — categorized; alphabetical within each (matches CLAUDE.md convention) */
 const stack = {
-  cloud: ['AWS (primary)', 'Azure', 'GCP'],
-  iac: ['Pulumi', 'Terraform Cloud'],
-  containers: ['ECS Fargate', 'EKS', 'Helm', 'Kubernetes'],
-  observability: ['CloudWatch', 'Datadog', 'Grafana', 'OpenTelemetry', 'Prometheus'],
-  cicd: ['ArgoCD', 'GitHub Actions', 'OIDC federation'],
-  languages: ['Bash', 'Go', 'Python', 'TypeScript'],
-  data: ['DynamoDB', 'Postgres / RDS Aurora', 'RabbitMQ', 'Redis', 'S3'],
+  cloud: ['AWS (EKS, S3, EC2, VPC, IAM, NLB, ALB)', 'Azure', 'GCP'],
+  iac: ['Ansible', 'Pulumi', 'Terraform'],
+  containers: ['ArgoCD', 'Docker', 'Docker Swarm', 'Helm', 'Kubernetes'],
+  observability: ['Datadog', 'ElasticSearch', 'Grafana', 'New Relic', 'Prometheus'],
+  cicd: ['ArgoCD', 'Git', 'GitHub Actions', 'GitLab CI/CD', 'Jenkins'],
+  languages: ['Bash', 'Core Java', 'Go', 'PHP', 'Python', 'Spring Boot'],
+  data: ['MySQL', 'Oracle', 'PostgreSQL', 'RabbitMQ', 'Redis'],
 };
 
 const studies = (
@@ -102,11 +192,12 @@ function statusFor(c: { expires?: string }): 'current' | 'expired' {
       <p class="resume-role">Cloud &amp; Platform Engineer</p>
 
       <ul class="resume-contact" role="list">
-        <li><a href="mailto:mokaysteve@gmail.com">mokaysteve@gmail.com</a></li>
+        <li><a href="mailto:stevieokoth@gmail.com">stevieokoth@gmail.com</a></li>
+        <li><a href="tel:+254714362027">+254 714 362 027</a></li>
         <li><a href="https://github.com/steveokay">github.com/steveokay</a></li>
         <li>portfolio.mokaysteve.workers.dev</li>
-        <!-- TODO(steve): add LinkedIn -->
-        <!-- <li><a href="https://linkedin.com/in/...">linkedin.com/in/...</a></li> -->
+        <!-- TODO(steve): drop in your LinkedIn URL when ready -->
+        <!-- <li><a href="https://linkedin.com/in/steveokoth">linkedin.com/in/steveokoth</a></li> -->
       </ul>
     </header>
 

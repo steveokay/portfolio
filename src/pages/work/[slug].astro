@@ -1,15 +1,18 @@
 ---
-import { getCollection, render } from 'astro:content';
-import type { GetStaticPaths } from 'astro';
+import { getCollection, render, type CollectionEntry } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 
-export const getStaticPaths: GetStaticPaths = async () => {
+export async function getStaticPaths() {
   const studies = await getCollection('caseStudies', (e) => !e.data.draft);
   return studies.map((entry) => ({
     params: { slug: entry.id },
     props: { entry },
   }));
-};
+}
+
+interface Props {
+  entry: CollectionEntry<'caseStudies'>;
+}
 
 const { entry } = Astro.props;
 const { Content } = await render(entry);
@@ -87,8 +90,8 @@ const d = entry.data;
 
       <hr class="mt-14 border-rule" />
 
-      <!-- Body -->
-      <div class="cs-prose mt-14 max-w-measure">
+      <!-- Body — text constrained to readable measure, figures break out wider -->
+      <div class="cs-prose mt-14">
         <Content />
       </div>
     </div>
@@ -96,7 +99,30 @@ const d = entry.data;
 </Base>
 
 <style is:global>
-  /* Bespoke prose styles for case-study MDX — matches field-notebook palette */
+  /* Bespoke prose styles for case-study MDX — matches field-notebook palette.
+     The wrapper fills max-w-wide; text elements are constrained to max-w-measure
+     for readability, while figures (diagrams) get the full wide width so they
+     stay legible. */
+  .cs-prose > p,
+  .cs-prose > h2,
+  .cs-prose > h3,
+  .cs-prose > ul,
+  .cs-prose > ol,
+  .cs-prose > blockquote,
+  .cs-prose > hr {
+    max-width: 34rem;
+  }
+
+  .cs-prose > figure {
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .cs-prose > pre {
+    max-width: 100%;
+  }
+
   .cs-prose h2 {
     font-family: 'Instrument Serif', ui-serif, Georgia, serif;
     font-weight: 400;

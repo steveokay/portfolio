@@ -24,7 +24,7 @@ export default {
       },
       maxWidth: {
         measure: '34rem',  // ~68 characters of Inter
-        wide: '64rem',
+        wide: '56rem',     // editorial article width — tight enough to feel centered
       },
       letterSpacing: {
         // For the all-caps eyebrow labels and section meta

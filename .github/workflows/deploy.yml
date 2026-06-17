@@ -27,6 +27,7 @@ jobs:
         env:
           PUBLIC_METRICS_API_URL: ${{ secrets.METRICS_API_URL }}
           PUBLIC_CF_ANALYTICS_TOKEN: ${{ secrets.CF_ANALYTICS_TOKEN }}
+          PUBLIC_BUILD_SHA: ${{ github.sha }}
 
       - name: Deploy to Cloudflare Workers
         run: npx wrangler deploy

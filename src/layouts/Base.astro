@@ -2,6 +2,7 @@
 import { ViewTransitions } from 'astro:transitions';
 import Cursor from '../components/islands/Cursor';
 import CommandPalette from '../components/islands/CommandPalette';
+import StatusBar from '../components/islands/StatusBar';
 import '@fontsource/inter/400.css';
 import '@fontsource/inter/600.css';
 import '@fontsource/jetbrains-mono/400.css';
@@ -23,6 +24,7 @@ const canonicalURL = Astro.site
   : null;
 
 const cfAnalyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
+const buildSha = (import.meta.env.PUBLIC_BUILD_SHA ?? 'dev').slice(0, 7);
 ---
 
 <!doctype html>
@@ -97,6 +99,7 @@ const cfAnalyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
   <body class="min-h-screen bg-bg text-fg antialiased">
     <Cursor client:load />
     <CommandPalette client:load />
+    <StatusBar buildSha={buildSha} client:load />
     <script>
       document.addEventListener('click', (e) => {
         const target = e.target as HTMLElement | null;
@@ -183,11 +186,11 @@ const cfAnalyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
       </div>
     </nav>
 
-    <main class="pt-8 pb-11 sm:pb-0">
+    <main class="pt-8 pb-11 sm:pb-7">
       <slot />
     </main>
 
-    <footer class="border-t border-border mt-32 py-8 mb-11 sm:mb-0">
+    <footer class="border-t border-border mt-32 py-8 mb-11 sm:mb-7">
       <div class="mx-auto max-w-7xl px-4 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs text-fg-muted">
         <span>© {new Date().getFullYear()} Steve Mokay</span>
         <div class="flex items-center gap-6">

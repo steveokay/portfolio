@@ -101,7 +101,7 @@
 ### Tier 1 — high impact, on-brand
 
 - [x] **Command palette (⌘K / Ctrl+K)** — terminal-style palette over everything: 14 commands (section jumps, case studies, GitHub repo, email, copy-url, copy-email). Fuzzy multi-token match across label/description/keywords. ↑↓/Home/End/Enter/Esc keyboard nav. Trigger chip `⌘K menu` in top status bar fires the same `cmdk:open` event. Internal navigation uses `astro:transitions/client` so View Transitions still morph case study titles.
-- [ ] **Bottom status bar** — fixed 24px tmux/powerline-style strip across every page: `uptime · req/s · region · build SHA · UTC clock`. Anchors the "you are inside a system" feeling everywhere, not just hero.
+- [x] **Bottom status bar** — fixed 28px tmux/powerline strip on desktop (`sm:flex`): `● sys.online · uptime (live) · req/s (random walk) · region (from /cdn-cgi/trace) · build SHA (from GitHub Actions) · UTC clock (live)`. Mobile keeps its bottom nav. `main`/`footer` padding adjusted to clear it.
 - [ ] **Distinctive monospace** — swap JetBrains Mono for Berkeley Mono ($75 one-time), Commit Mono (free, ligatures), or Departure Mono (free, retro-tech). Single font swap, large perception shift.
 - [ ] **Streaming SSR case studies** — case study pages stream section-by-section using server islands / Suspense. Feels like the page is *executing* rather than loading.
 

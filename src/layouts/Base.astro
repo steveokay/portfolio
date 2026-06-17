@@ -5,8 +5,9 @@ import CommandPalette from '../components/islands/CommandPalette';
 import StatusBar from '../components/islands/StatusBar';
 import '@fontsource/inter/400.css';
 import '@fontsource/inter/600.css';
-import '@fontsource/jetbrains-mono/400.css';
-import '@fontsource/jetbrains-mono/500.css';
+import '@fontsource/commit-mono/400.css';
+import '@fontsource/commit-mono/400-italic.css';
+import '@fontsource/commit-mono/600.css';
 import '../styles/global.css';
 
 interface Props {
@@ -71,7 +72,7 @@ const buildSha = (import.meta.env.PUBLIC_BUILD_SHA ?? 'dev').slice(0, 7);
         pointer-events: none;
       }
       #__loader-inner {
-        font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+        font-family: 'Commit Mono', ui-monospace, Menlo, monospace;
         font-size: 0.7rem;
         line-height: 1.9;
         width: 100%;

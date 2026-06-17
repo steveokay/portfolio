@@ -24,7 +24,7 @@ export default {
         unknown: '#6b7280',
       },
       fontFamily: {
-        mono: ['"JetBrains Mono"', '"Fira Code"', 'Menlo', 'Consolas', 'monospace'],
+        mono: ['"Commit Mono"', '"JetBrains Mono"', 'Menlo', 'Consolas', 'monospace'],
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
       },
       animation: {

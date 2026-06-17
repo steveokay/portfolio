@@ -167,7 +167,7 @@ export default function InfraDiagram() {
         width="100%"
         style={{ minWidth: 560 }}
         xmlns="http://www.w3.org/2000/svg"
-        fontFamily='"JetBrains Mono", "Fira Code", Menlo, monospace'
+        fontFamily='"Commit Mono", "JetBrains Mono", Menlo, monospace'
         role="img"
         aria-labelledby="infra-title"
       >

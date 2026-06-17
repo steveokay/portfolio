@@ -55,9 +55,9 @@ Clean restart. Old terminal/control-room concept lives in git history (last comm
 
 ## Phase 5 — polish & accessibility
 
-- [ ] Custom 404 (matches site aesthetic)
-- [ ] Custom favicon (SVG, teal mark on cream)
-- [ ] OG image (1200×630, generated via Higgsfield, on-brand)
+- [x] **Custom 404** — `src/pages/404.astro`. Eyebrow + serif "Not found." + `find`-style shell pretend-output that surfaces the actual missed path via inline script, list of canonical paths as clickable mono entries, back-home CTA. `not_found_handling: "404-page"` re-enabled in `wrangler.jsonc` so Cloudflare routes misses through this page.
+- [x] **Custom favicon** — `public/favicon.svg`. 32×32 rounded cream tile with teal serif `S` (Georgia / Instrument Serif fallback).
+- [x] **OG image** — `public/og.svg` + `public/og.png` (1200×630). Hand-built: cream + blueprint-dot backdrop, "Steve Okoth / Cloud & Platform Engineer" in Georgia, monospace tagline, status-dot URL line. Right side shows a faint architecture-diagram motif (Route 53 → CloudFront → ECS Fargate with teal accent path) so the social preview doubles as a stack hint. PNG generated from SVG via `sharp` (78 KB).
 - [ ] Reading progress on case-study pages (CSS-only `animation-timeline: scroll()` where supported, no JS)
 - [ ] Optional dark mode (`prefers-color-scheme: dark` only — no toggle)
 - [ ] WCAG AA contrast verification (every pair)

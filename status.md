@@ -93,6 +93,11 @@
 | 12 | Interactive terminal (typeable commands) | ✅ |
 | 13 | Cloudflare Web Analytics beacon | ✅ |
 | 14 | Sitemap | ✅ |
+| 15 | Command palette (⌘K / Ctrl+K) | ✅ |
+| 16 | Bottom status bar (tmux/powerline) | ✅ |
+| 17 | Distinctive monospace (Commit Mono) | ✅ |
+| 18 | Easter-egg terminal commands | ✅ |
+| 19 | Palette discoverability (boot hint + chip pulse + help mention) | ✅ |
 
 ---
 
